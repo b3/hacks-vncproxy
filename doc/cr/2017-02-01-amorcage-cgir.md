@@ -80,9 +80,9 @@ Toutes les documentations et productions écrites (documentation, diaporamas, ra
 
 ## Bruno
 
-- [ ] faire un compte-rendu de cette réunion
+- [x] faire un compte-rendu de cette réunion
 
-- [ ] initier et rendre disponible un dépôt git aux étudiants
+- [x] initier et rendre disponible un dépôt git aux étudiants
 
 # Prochain RDV : pendant le cours de supervision du 14 février
 
