@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Vérifie que tous les outils nécessaires sont disponibles.
+#
+# usage: check-tools [OPTIONS]
+#
+# OPTIONS possibles :
+#     -h, --help  affiche ce message
+#     -l          liste les paquets Debian nécessaires
+
+# FreeBSD & GNU do not have same options to use Extended Regular Expression in sed
+if sed v </dev/null >/dev/null 2>&1 ; then # 'v' is specific to GNU sed
+  _sed() { sed -r "$@" ; }    # GNU
+else
+  _sed() { sed -E "$@" ; }    # (FreeBSD)
+fi
+
+# doc is included as comments from 2nd line of the script to first empty line
+doc () { sed -n '2,/^$/ {s/^ *#// ; s/^ //g ; p }' <$0 ; }
+
+# warn absence of $1, last parm may be used for listing needed debian packages
+need () { echo "$1 is unavailable" ; exit 1 ; }
+
+# run a command silently
+mute () { 1>/dev/null 2>&1 $* ; }
+
+[ "x$1" = "x-h" -o "x$1" = "x--help" ] && doc && exit
+[ "$1" = "-l" ] && egrep '\|\| need' $0 | _sed 's/^.* (.*)$/\1/' && exit
+
+# Pour le lancement des tâches
+mute which make || need make
+
+# Pour la gestion des versions
+mute which git || need git
+
+# Pour la conversion Markdown vers beamer
+mute which pandoc || need pandoc
+mute which base64 || need base64 coreutils
+mute which pdflatex || need pdflatex texlive-latex-base
+mute kpsewhich beamer.cls || need beamer.cls texlive-latex-recommended
+
+# Local Variables:
+# sh-indentation: 2
+# sh-basic-offset: 2
+# End:
