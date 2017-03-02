@@ -72,7 +72,7 @@ Toutes les documentations et productions écrites (documentation, diaporamas, ra
 
 - [ ] Préparer un planning prévisionnel du travail
 
-- [ ] Créer un compte chacun sur [github](https://github.com)
+- [x] Créer un compte chacun sur [github](https://github.com)
 
   - y déposer une clé publique ssh
 
