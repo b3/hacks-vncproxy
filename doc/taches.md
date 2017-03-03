@@ -1,10 +1,10 @@
 # Taches à réaliser
 
-* ssh client depuis windows (PUTTY) avec exchange le clé ssh
-* ssh au dessus de proxy HTTP
-* connection VNC au Linux
+* ssh client depuis windows (PUTTY) avec exchange le clé ssh(zohari)
+* ssh au dessus de proxy HTTP(zohari)
+* connection VNC au Linux(legrand)
 	* reverse vnc
-* connection VNC sur Windows
+* connection VNC sur Windows(canivez)
 * VNC au dessus de ssh
 
 
@@ -38,11 +38,11 @@ remplacer /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr et 3128 par des valeu
 
 ##### mon problem de se connecter au serveur avec ssh:
 
-malgré que je suis sure que mon clé publique marche bien, je reçoie cette message d'erreur 
+malgré que je suis sure que mon clé ssh marche bien, je reçoie cette message d'erreur 
 
 
 ```javascript
-ssh -vvv test.boulgour.com
+ssh -vvv cgir@test.boulgour.com
 OpenSSH_6.7p1 Debian-5+deb8u3, OpenSSL 1.0.1t  3 May 2016
 debug1: Reading configuration data /home/infoetu/zoharif/.ssh/config
 debug1: /home/infoetu/zoharif/.ssh/config line 5: Applying options for *
@@ -70,7 +70,8 @@ debug1: Local version string SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u3
 Proxy could not open connnection to test.boulgour.com:  Forbidden
 ssh_exchange_identification: Connection closed by remote host
 ```
-je veux actuellement trouver une solution sur cette partie...
+
+je trouve que corkscrew peut être utilisr pour se connecter à un serveur SSH exécuté sur un port 443 distant via un proxy HTTPS strict.donc je pense le seul moyen pour resoudre ce problem est de changer le port ssh sur serveur distance.
 
 
 
