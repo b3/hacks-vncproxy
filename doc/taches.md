@@ -15,6 +15,7 @@
 
 introduction
 ------------
+
 Corkscrew est un outil de tunnelling SSH via les proxys HTTP.
 
 Pour le mettre en place, il faut le télécharger et le placer dans
@@ -25,7 +26,7 @@ Pour l'installer dans le répertoire de corkscrew, tapez 'make install'.
 
 Comment est-il utilisé?
 ---------------
-La mise en place du corkscrew avec SSH / OpenSSH est très simple. Ajouter
+La mise en place de corkscrew avec SSH / OpenSSH est très simple. Ajouter
 La ligne suivante vers votre fichier ~ / .ssh / config :
 
 ```javascript
@@ -33,10 +34,10 @@ Host *
    ProxyCommand /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr 3128 %h %p 
 ```
 
-remplacer /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr et 3128 par des valeurs correctes
+Remplacer /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr et 3128 par des valeurs correctes
 
 
-##### mon problem de se connecter au serveur avec ssh:
+##### Problème avec la connection au serveur avec ssh:
 
 malgré que la clé ssh est fonctionnelle, je reçoie ce message d'erreur 
 
