@@ -15,12 +15,13 @@
 
 introduction
 ------------
-Corkscrew est un outil de tunnelLing SSH via les proxys HTTP.
 
-Pour le construire vous devez le télécharer, puis, dans
+Corkscrew est un outil de tunnelling SSH via les proxys HTTP.
+
+Pour le mettre en place, il faut le télécharger et le placer dans
 le répertoire de corkscrew, tapez './configure' puis 'make'.
 
-Pour l'installer dans le répertoire du corkscrew, tapez 'make install'.
+Pour l'installer dans le répertoire de corkscrew, tapez 'make install'.
 
 
 Comment est-il utilisé?
@@ -38,7 +39,7 @@ Remplacer /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr et 3128 par des valeu
 
 ##### Problème avec la connection au serveur avec ssh:
 
-malgré que la clé ssh soit correcte, je reçoie ce message d'erreur 
+malgré que la clé ssh est fonctionnelle, je reçoie ce message d'erreur 
 
 
 ```javascript
@@ -71,7 +72,7 @@ Proxy could not open connnection to test.boulgour.com:  Forbidden
 ssh_exchange_identification: Connection closed by remote host
 ```
 
-je trouve que corkscrew peut être utilisé pour se connecter à un serveur SSH exécuté sur un port 443 distant via un proxy HTTPS strict.donc je pense le seul moyen pour resoudre ce problem est de changer le port ssh sur serveur distance.
+je trouve que corkscrew peut être utilisé pour se connecter à un serveur SSH exécuté sur un port 443 distant via un proxy HTTPS strict.donc je pense le seul moyen pour resoudre ce problème est de changer le port ssh sur serveur distance.
 
 
 
