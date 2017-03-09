@@ -68,7 +68,7 @@ Toutes les documentations et productions écrites (documentation, diaporamas, ra
 
 - [X] Se familiariser avec git via la lecture de [Progit](https://git-scm.com/book/fr/v2) par exemple.
 
-- [ ] Se familiariser avec le format [Markdown](http://daringfireball.net/projects/markdown) et sa [version modifiée par Github](https://guides.github.com/features/mastering-markdown).
+- [X] Se familiariser avec le format [Markdown](http://daringfireball.net/projects/markdown) et sa [version modifiée par Github](https://guides.github.com/features/mastering-markdown).
 
 - [ ] Préparer un planning prévisionnel du travail
 
