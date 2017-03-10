@@ -1,12 +1,18 @@
 # Connexion reverse VNC sous windows
-
+## Structure
+Dans notre cas nous allons prendre le controle d'une machine virtuelle Windows depuis la machine h√¥te sous Linux.  
+L'adresse ip de la machine h√¥te est 172.18.48.231. Nous utiliserons le port par d√©faut : 5500.
 ## TightVNC
-
-Pour le serveur VNC sous Windows j'ai choisi TightVNC car il est libre et dispose d'une bonne communautÈ en cas de besoin.
-
+Pour le serveur VNC sous Windows j'ai choisi TightVNC car il est libre et dispose d'une bonne communaut√© en cas de besoin.
 ## Configuration
-
-Une fois installÈ et lancÈ, une petite icÙne apparaÓt en bas ‡ droite dans la barre de t‚ches. Il suffit de faire un clic droit dessus et de cliquer sur `attach listening viewer`.
-
-L‡ une boite de dialogue apparaÓt dans laquelle il faut rentrer l'adresse de la machine avec laquelle on veut partager la connexion ainsi que le port sur lequel le serveur va Ècouter par exemple : `192.168.1.42::443`
-
+### Sur la machine Linux (client)
+Une fois le paquet t√©l√©charg√©, il suffit d'ouvrir un terminal et d'y rentrer la commande :  
+`xvnc4viewer -listen`  
+A ce moment, le client va √©couter sur le port 5500 et attendre qu'un serveur lui diffuse son √©cran.  
+![](http://nsa37.casimages.com/img/2017/03/08//170308023935483815.png)
+### Sur la machine Windows (serveur)
+Une fois install√© Tight VNC et le client lanc√©, il faut lancer *TightVNC Server (service mode)*. Afin que le serveur fonctionne en mode reverse, il suffit de faire un clic droit sur l'icone en bas √† droite dans la barre de t√¢ches et de cliquer sur *attach listening viewer*.  
+![](http://nsa37.casimages.com/img/2017/03/08//170308023454757276.png)  
+L√† une boite de dialogue appara√Æt dans laquelle il faut rentrer l'adresse de la machine avec laquelle on veut partager la connexion ainsi que le port sur lequel le serveur va √©couter. Il s'agit ici de la amchine h√¥te. Cliquer sur *attach* pour valider.  
+Par exemple dans notre cas : 192.168.1.42::5500  
+![](http://nsa37.casimages.com/img/2017/03/08//170308023726311449.png)
