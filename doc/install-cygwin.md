@@ -9,7 +9,7 @@ Since the default value for each option is the logical choice for most installat
 
 #### Download Source
 
-![](http://nsa38.casimages.com/img/2017/03/09/170309050502944802.png)
+![](img/170309050502944802.png )
 
  > Cygwin uses packages to manage installing various software. When the default Install from Internet option is chosen, setup.exe creates a local directory to store the packages before actually installing the contents. Download from Internet performs only the first part (storing the packages locally), while Install from Local Directory performs only the second (installing the contents of the packages).
 
@@ -19,7 +19,7 @@ Since the default value for each option is the logical choice for most installat
 #### Selecting an Install Directory
 
 
-![](http://nsa38.casimages.com/img/2017/03/09/170309051246581070.png)
+![](img/170309051246581070.png)
 
 The Root Directory for Cygwin (default C:\cygwin) will become / within your Cygwin installation. You must have write access to the parent directory, and any ACLs on the parent directory will determine access to installed files.
 
@@ -28,7 +28,7 @@ The Install For options of All Users or Just Me should always be left on the def
 
 #### Local Package Directory
 
-![](http://nsa38.casimages.com/img/2017/03/09/170309051831229773.png)
+![](img/170309051831229773.png)
 
 The Local Package Directory is the cache where setup.exe stores the packages before they are installed. The cache must not be the same folder as the Cygwin root. Within the cache, a separate directory is created for each Cygwin mirror, which allows setup.exe to use multiple mirrors and custom packages. After installing Cygwin, the cache is no longer necessary, but you may want to retain the packages as backups, for installing Cygwin to another system, or in case you need to reinstall a package. 
 
