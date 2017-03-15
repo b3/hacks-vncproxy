@@ -12,6 +12,9 @@ sinclude makefile.$(shell uname -n)
 check:							## vérifier la présence des outils nécessaires
 	@bin/check-tools && echo OK
 
+todo:							## lister les tâches à réaliser (TODO: dans les fichiers)
+	@grep -r "TODO:" --exclude $(MAKEFILE_LIST) *
+
 push:							## pousser les modifications vers les dépôts git
 	git push boulgour master
 	git push github master
