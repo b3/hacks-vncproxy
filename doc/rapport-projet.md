@@ -38,7 +38,8 @@ Dans notre exemple :
 ```  
 $ x11vnc -connect 172.18.48.231:5500
 ```  
-Le client à pris possession de la machine serveur.  
+Le client a pris possession de la machine serveur.  
+Le `reverse VNC` fonctionne entre deux machines lINUX, Il faut maintenant obtenir le même résultat entre une machine Windows et Linux.  
   
 >## Connection VNC sur machine Windows
 >>### Reverse VNC
