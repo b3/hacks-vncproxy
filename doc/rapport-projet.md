@@ -142,6 +142,8 @@ Cette commande permet de réaliser cette opération :
     
 L'utilisateur de la machine distante (le serveur SSH) possède maintenant la clé publique de l'utilisateur de la machine local (le client SSH). Les deux machines peuvent maintenant s'échanger des données chiffrées et les déchiffrer avec une authentification sécurisée sans échange de mot de passe sur le réseau.
 
+>>>### SSH sur machine Linux-Linux
+
 Maintenant, nous pouvons établir une connexion VNC au travers de SSH.  
 
 ![](img/ssh_sans_proxy.png)  
@@ -181,6 +183,8 @@ Il faut maintenant intégrer `corkscrew` afin de traverser le proxy.
 > ## SSH et VNC à travers le proxy
 
 ![](img/schema-ssh.png)
+
+>>>### SSH sur machine Linux-Windows
 
 # Conclusion
 # Annexes

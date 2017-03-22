@@ -10,6 +10,8 @@
 >## Connection VNC sur Windows
 >>### Reverse VNC
 >## VNC au dessus de SSH sans proxy
+>>### SSH sur machine Linux-Linux
+>>### SSH sur machine Linux-Windows
 >## SSH et VNC à travers le  proxy
 # Conclusion
 # Annexes
