@@ -148,7 +148,7 @@ Maintenant, nous pouvons établir une connexion VNC au travers de SSH.
 
 La conexion SSH se fera dans un premier temps sur le même réseau local.  
 Il y a 3 étapes pour établir la connexion vnc au travers de vnc.  
-1ère étape:  
+**1ère étape:** 
 
 La connexion ssh doit se faire à partir du controlé avec cette commande :
 ```
@@ -158,7 +158,7 @@ $ ssh -R 5500:[@ip_contrôleur]:[5500] localhost
 
 A ce stade, une connexion ssh est établie entre les deux machines. 
 
-2ème étape :  
+**2ème étape :**  
 
 Sur la machine distante (controleur), il faut lancer le client vnc. Il sera alors en écoute sur le port 5500 et attend qu'un serveur vienne écouter sur ce même port.
 
@@ -166,7 +166,7 @@ Sur la machine distante (controleur), il faut lancer le client vnc. Il sera alor
   
 Les manipulations sont terminées coté controleur.  
 
-3ème étape :  
+**3ème étape :**  
 
 Il faut maintenant lancé le server vnc coté `controlé`.
 
