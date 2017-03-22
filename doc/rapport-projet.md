@@ -72,19 +72,16 @@ L'étape suivante consiste à éxécuter le `reverse VNC` au travers de ssh.
 
 >## VNC au dessus de SSH sans proxy
 
-# Fonctionnement de SSH
+SSH est un protocole de communication permettant d'effectuer des opérations sécurisées sur un réseau non-sécurisé. Par extension c'est également un programme qui implémente ce protocole.
 
-SSH est un protocole de communication permettant d'effectuer des opérations sécurisées sur un réseau non$
+Historiquement il est, *notamment*, construit pour exécuter des commandes via un shell sur une machine distante à partir d'une machine locale. C'est de la que vient son nom **S**ecure **SH**ell.
 
-Historiquement il est, *notamment*, construit pour exécuter des commandes via un shell sur une machine d$
-
-Il permet d'établir une connexion sécurisée et chiffrée entre les deux machines puis exécute un shell su$
+Il permet d'établir une connexion sécurisée et chiffrée entre les deux machines puis exécute un shell sur la machine distante dans lequel les commandes demandées sont exécutées. L'utilisateur de la machine locale doit pouvoir s'identifier sur la machine distante en tant qu'un utilisateur existant sur celle-ci.
 
 Plusieurs méthodes d'authentification sont possibles.
 
-* la fourniture/vérification du mot de passe de l'utilisateur distant par l'utilisateur local
-* une *poignée de main* chiffrée via la mise à disposition de l'utilisateur distant par l'utilisateur lo$
-
+* la fourniture/vérification du mot de passe de l'utilisateur distant par l'utilisateur local 
+* une *poignée de main* chiffrée via la mise à disposition de l'utilisateur distant par l'utilisateur local d'une clé publique 
 
 > ## SSH et VNC à travers le proxy
 # Conclusion
