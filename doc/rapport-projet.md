@@ -17,8 +17,11 @@ La procédure à mettre en place sur la machine à assister doit être la plus s
 >## Etude des solutions
 >## Avantages des solutions retenues  
 # Mise en oeuvre
->## SSH au dessus du proxy HTTP/HTTPS
->>### Script
+
+Pour mener à bien ce projet, nous avons découpé les tâches afin d'arriver au résultat final.
+Nous avons tout d'abord pris connaissance du fonctionnement de VNC, puis le fonctionnement de SSH.
+Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistait à passer le proxy via `corkscrew`.
+
 >## Connection VNC sur machine Linux
 >>### Virtual Network Computing (VNC)
 Virtual Network Computing (VNC) est un logiciel utilisé pour se connecter à un ordinateur distant.
@@ -200,6 +203,7 @@ Il faut maintenant intégrer `corkscrew` afin de traverser le proxy.
 
 ![](img/schema-ssh.png)
 
+>>### Script d'automatisation
 
 # Conclusion
 # Annexes
