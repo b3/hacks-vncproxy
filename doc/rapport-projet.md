@@ -67,8 +67,25 @@ ainsi que le port d'écoute. Cliquer sur `attach` pour valider.
 
 ![](img/170308023726311449.png)  
 
+Le `reverse vnc` fonctionne à présent sur Linux et Windows.  
+L'étape suivante consiste à éxécuter le `reverse VNC` au travers de ssh.  
 
 >## VNC au dessus de SSH sans proxy
+
+# Fonctionnement de SSH
+
+SSH est un protocole de communication permettant d'effectuer des opérations sécurisées sur un réseau non$
+
+Historiquement il est, *notamment*, construit pour exécuter des commandes via un shell sur une machine d$
+
+Il permet d'établir une connexion sécurisée et chiffrée entre les deux machines puis exécute un shell su$
+
+Plusieurs méthodes d'authentification sont possibles.
+
+* la fourniture/vérification du mot de passe de l'utilisateur distant par l'utilisateur local
+* une *poignée de main* chiffrée via la mise à disposition de l'utilisateur distant par l'utilisateur lo$
+
+
 > ## SSH et VNC à travers le proxy
 # Conclusion
 # Annexes
