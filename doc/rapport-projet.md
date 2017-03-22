@@ -142,6 +142,44 @@ Cette commande permet de réaliser cette opération :
     
 L'utilisateur de la machine distante (le serveur SSH) possède maintenant la clé publique de l'utilisateur de la machine local (le client SSH). Les deux machines peuvent maintenant s'échanger des données chiffrées et les déchiffrer avec une authentification sécurisée sans échange de mot de passe sur le réseau.
 
+Maintenant, nous pouvons établir une connexion VNC au travers de SSH.  
+
+![](img/ssh_sans_proxy.png)  
+
+La conexion SSH se fera dans un premier temps sur le même réseau local.  
+Il y a 3 étapes pour établir la connexion vnc au travers de vnc.  
+1ère étape:  
+
+La connexion ssh doit se faire à partir du controlé avec cette commande :
+```
+$ ssh -R 5500:[@ip_contrôleur]:[5500] localhost
+```
+`-R`: permet de spécifier que tout ce qui arrive sur le port 5500 de la machine distante (controleur) sera transféré sur la machine local (controlé) via le port 5500  
+
+A ce stade, une connexion ssh est établie entre les deux machines. 
+
+2ème étape :  
+
+Sur la machine distante (controleur), il faut lancer le client vnc. Il sera alors en écoute sur le port 5500 et attend qu'un serveur vienne écouter sur ce même port.
+
+	$ xvnc4viewer -listen  
+  
+Les manipulations sont terminées coté controleur.  
+
+3ème étape :  
+
+Il faut maintenant lancé le server vnc coté `controlé`.
+
+	$ x11vnc -connect localhost:5500  
+
+Cette commande permet de se connecter à localhost via le port 5500.
+
+Sur l'écran du controleur, on a bien pris la main du controlé.
+
+Il faut maintenant intégrer `corkscrew` afin de traverser le proxy.
+
+
+
 > ## SSH et VNC à travers le proxy
 # Conclusion
 # Annexes
