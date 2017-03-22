@@ -1,7 +1,7 @@
 # Présentation  
 >## Objectif du projet
 >## Etude des solutions  
->## Avantages de notre choix  
+>## Avantages des solutions retenues  
 # Mise en oeuvre
 >## SSH au dessus du proxy HTTP/HTTPS
 >>### Script
