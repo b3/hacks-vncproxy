@@ -178,9 +178,10 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 Il faut maintenant intégrer `corkscrew` afin de traverser le proxy.
 
-
-
 > ## SSH et VNC à travers le proxy
+
+![](img/schema-ssh.png)
+
 # Conclusion
 # Annexes
 
