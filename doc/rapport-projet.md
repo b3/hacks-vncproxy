@@ -55,7 +55,7 @@ Sur la machine cliente (Linux), il faut taper la même commande vue précédemme
 $ xvncviewer -listen
 ```
 Le client va écouter sur le port `5500` et attendre qu'un serveur lui diffuse son écran. 
-![](img/17030802393543815.png)  
+![](img/170308023935483815.png)  
 
 Sur le serveur (machine Windows), il faut installer `Tight VNC`  
 Une fois `TightVNC` installé et le client lancé, il faut démarrer `TightVNC Server(service mode)`. Pour le fonctionnement en reverse, il faut faire un clic droit sur l'icône en bas à droite dans la barre  de tâches et de cliquer sur `attach listening viewer`  
