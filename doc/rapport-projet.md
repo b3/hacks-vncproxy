@@ -6,7 +6,7 @@
 >## SSH au dessus du proxy HTTP/HTTPS
 >>### Script
 >## Connection VNC sur machine Linux
->### Virtual Network Computing (VNC)
+>>### Virtual Network Computing (VNC)
 Virtual Network Computing (VNC) est un logiciel utilisé pour se connecter à un ordinateur distant.
 Il permet de transmettre les saisies au clavier ainsi que les clics de la souris d'un ordinateur à l'autre.  
 Cela permet tout simplement de prendre le contrôle d'une machine distante qu'elle soit en local ou par le biais d'internet.  
@@ -20,7 +20,12 @@ Ce n'est pas le client qui se connecte au serveur mais l'inverse. Le client va a
 Nous avons donc mis en place ce `reverse VNC` entre deux machines situées sur le même réseau local (sans traverser de proxy)  
 >>### Reverse VNC
 Nous allons donc prendre le contrôle d'une machine Linux à l'aide d'une autre machine Linux située sur le même réseau privé (Salle de TP).  
+L'adresse ip de la machine qui prend le contrôle est : `172.18.48.231`  
+Le port d'écoute est le `5500`  
 
+Pour le client, il faut télécharger le paquet `xtightvncviewer`  
+Ensuite, il faut éxécuter la commande `xvncviewer -listen`
+![](img/vnc-reverse.png)  
 >## Connection VNC sur machine Windows
 >>### Reverse VNC
 >## VNC au dessus de SSH sans proxy
