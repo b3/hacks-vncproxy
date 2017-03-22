@@ -1,16 +1,15 @@
-# Plan Rapport de projet
-
-## Introduction  
-## Objectifs  
-## Mise en oeuvre  
-### Secure Shell SSH
-### Virtual Network Computing VNC
-#### Reverse VNC Linux-Linux
-#### Reverse VNC Linux-Windows
-### Corkscrew
-## Tests
-### Linux-Linux
-### Linux-Windows
-## Apports du projet
-## Conclusion
-
+# Présentation  
+>## Objectif du projet
+>## Etude des solutions  
+>## Avantages de notre choix  
+# Mise en oeuvre
+>## SSH au dessus du proxy HTTP/HTTPS
+>### Script
+>## Connection VNC sur Linux
+>### Reverse VNC
+>## Connection VNC sur Windows
+>### Reverse VNC
+>## VNC au dessus de SSH sans proxy
+>## SSH et VNC à travers du proxy
+# Conclusion
+# Annexes
