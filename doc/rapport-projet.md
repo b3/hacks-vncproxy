@@ -26,6 +26,16 @@ Le port d'écoute est le `5500`
 Pour le client, il faut télécharger le paquet `xtightvncviewer`  
 Ensuite, il faut éxécuter la commande `xvncviewer -listen`
 ![](img/vnc-reverse.png)  
+
+Cette commande permet au client d'écouter sur le port `5500` et attend qu'un serveur vienne écouter sur ce même port afin d'établir la connection.  
+Maintenant, il faut lancer le serveur sur l'autre machine.  *
+Pour le serveur, il faut installer le paquer `x11vnc`.  
+Ensuite il faut lancer la commande suivante :  
+	$ x11vnc -connect [@ip_machine_contrôle]:[port_écoute]  
+Dans notre exemple :
+	$ x11vnc -connect 172.18.48.231:5500  
+Le client à pris possession de la machine serveur.  
+  
 >## Connection VNC sur machine Windows
 >>### Reverse VNC
 >## VNC au dessus de SSH sans proxy
