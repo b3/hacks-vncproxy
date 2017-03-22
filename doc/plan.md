@@ -10,6 +10,6 @@
 >## Connection VNC sur Windows
 >>### Reverse VNC
 >## VNC au dessus de SSH sans proxy
->## SSH et VNC à travers du proxy
+>## SSH et VNC à travers le  proxy
 # Conclusion
 # Annexes
