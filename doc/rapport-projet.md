@@ -13,7 +13,7 @@ Cela permet tout simplement de prendre le contrôle d'une machine distante qu'el
 Pour l'utiliser, nous avons besoin d'un `client VNC` ainsi qu'un `serveur VNC`.
 Le client VNC se connecte sur un serveur et permet d'en prendre son contrôle.
 
-![](img/vnc-exemple.jpeg)
+![](img/vnc-exemple.jpg)
 
 >>### Reverse VNC
 >## Connection VNC sur machine Windows
