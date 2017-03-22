@@ -178,13 +178,14 @@ Cette commande permet de se connecter à localhost via le port 5500.
 
 Sur l'écran du controleur, on a bien pris la main du controlé.
 
+>>>### SSH sur machine Linux-Windows
+
 Il faut maintenant intégrer `corkscrew` afin de traverser le proxy.
 
 > ## SSH et VNC à travers le proxy
 
 ![](img/schema-ssh.png)
 
->>>### SSH sur machine Linux-Windows
 
 # Conclusion
 # Annexes
