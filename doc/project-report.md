@@ -43,6 +43,31 @@ Thus we set up it `reverse VNC` between two machine situated on the same local a
 
 >>### Reverse VNC
 
+We are thus going to take control of a Linux machine by means of another Linux machine situated on the same private network (Practical classes).  
+The ip address od the machine which takes control is : 172.18.48.231.  
+The listening port is : 5500.  
+For the customer, its necessary to download the package `xtightvncviewer`.  
+Then, it's necessary to execute this order :  
+```
+$ xvncviewer -listen
+```
+
+![](img/vnc-reverse.png)  
+
+This order allows to the customer to listen to on the port 5500 ans waits that a server comes to listen
+to on the same port to establish the connection.  
+Now, it's necessary to launch the server on the other machine. For the server, it's necessary to install
+the package `x11vnc`.  
+Then, you have to launch this order :  
+```
+$ x11vnc -connect [@ip-machine-control]:[listening-port]
+```
+In our example :  
+```
+$ x11vnc -connect 172.18.48.231:5500
+```
+The customer took up the server machine. Reverse VNC works between two machines Linux, it's now necessary
+to obtain the same result between a Windows and Linux Machine.  *
 
 
 
