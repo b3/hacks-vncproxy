@@ -67,7 +67,42 @@ In our example :
 $ x11vnc -connect 172.18.48.231:5500
 ```
 The customer took up the server machine. Reverse VNC works between two machines Linux, it's now necessary
-to obtain the same result between a Windows and Linux Machine.  *
+to obtain the same result between a Windows and Linux Machine.  
+
+>## VNC connection with Windows machine
+
+Now, the maintaining purpose ,it's to find a VNC server (free) under windows. We choose the server
+`TightVNC`. It's a freeware and he has a good community.  
+
+>>### Reverse VNC
+
+As on Linux machine, it nedds to use VNC in `reverse mode`. On the customer machine (Linux), it's necessary
+to launch the same order seen previously:  
+```
+$ xvncviewer -listen
+```
+The customer is going to listen on the `5500 port` and to wait that a server spreads him his screen. 
+
+![](img/170308023935483815.png)  
+
+On the server (Windows machine), we need to install `TightVNC`. Once `TightVNC` was installed and
+the customer was launched. We need to start `TightVNC Server`(service mode). For the reverse mode, make
+a right clik on the lower right icon in the tasks bar and clik on `attach listening viewer`.  
+
+![](img/170308023454757216.png)  
+
+A dialog box appears which one it's necessary to enter the address of the machine with which we want
+to share the connection as well as the listening port. Click on `attach` to validate.  
+
+![](img/170308023726311449.png)  
+
+`Reverse vnc` works at the moment on Linux and Windows. 
+The following stage consists to execute puts `reverse vnc` through `ssh`.  
+
+># VNC above SSH without proxy  
+
+
+
 
 
 
