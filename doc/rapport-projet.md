@@ -204,13 +204,6 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 >>>### SSH sur machine Linux-Windows
 
-Il faut maintenant intégrer `corkscrew` afin de traverser le proxy.
-
-> ## SSH et VNC à travers le proxy
-
-![](img/schema-ssh.png)
-
->>### Script d'automatisation
 
 # Conclusion
 # Annexes
