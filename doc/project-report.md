@@ -103,17 +103,29 @@ The following stage consists to execute puts `reverse vnc` through `ssh`.
 
 SSH is a communication protocol allowing to make operations reassured on a non-secure network. By extension it is also the program which implements this protocol.
 
-Historically he is built, in particular, to execute orders via a shell on a distant machine from a local machine. It is of her that comes his name Secure SHell.
+Historically he is built, in particular, to execute orders via a shell on a distant machine from a local machine. It is of her that comes his name **S**ecure **SH**ell.
 
 He allows to establish a connection secure and calculated between both machines then executes a shell on the distant machine in which the wanted orders are executed. The user of the local machine must be able to become identified on the distant machine as a user existing on this one.
 
 Several methods of authentification are possible.
 
-The supply/check of the password of the distant user by the local user a handshake calculated via the provision of the distant user by the local user of a public key
+* The supply/check of the password of the distant user by the local user
+* A handshake calculated via the provision of the distant user by the local user of a public key
 
-Under Unix, to use SSH, it is simply necessary to install the package openssh for the part customer and openssh-server for the part waiter.
+Under Unix, to use SSH, it is simply necessary to install the package `openssh` for the part customer and `openssh-server` for the part waiter.
 
 Under Debian GNU/Linux it means executing one of the two order following as administrator (root):
 
+```
+apt-get update && apt-get install openssh  
+apt-get update && apt-get install openssh-server  
+```
+
+Under Debian GNU / Linux, the configuration of SSH is made via various files:
+
+* `/etc/ssh/ssh_config`: default configuration of the customer ssh
+* `/etc/ssh/sshd_config`: configuration of ssh server
+* `/etc/ssh_host_rsa_key`: Private key of the server
+* `/etc/ssh/ssh_host_rsa_key.pub`: Public key of the server
 
 
