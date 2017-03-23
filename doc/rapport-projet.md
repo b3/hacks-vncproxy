@@ -19,8 +19,15 @@ La procédure à mettre en place sur la machine à assister doit être la plus s
 # Mise en oeuvre
 
 Pour mener à bien ce projet, nous avons découpé les tâches afin d'arriver au résultat final.
-Nous avons tout d'abord pris connaissance du fonctionnement de VNC, puis le fonctionnement de SSH.
-Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistait à passer le proxy via `corkscrew`.
+Nous avons tout d'abord pris connaissance le fonctionnement de corkscrew, puis le fonctionnement de VNC.
+Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistait à passer le proxy via `corkscrew` au travers de SSH.
+
+
+>## SSH au dessus du proxy HTTP/HTTPS
+
+![](img/schema-ssh.png)
+
+>>### Script d'automatisation
 
 >## Connection VNC sur machine Linux
 >>### Virtual Network Computing (VNC)
