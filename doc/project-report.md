@@ -101,8 +101,19 @@ The following stage consists to execute puts `reverse vnc` through `ssh`.
 
 ># VNC above SSH without proxy  
 
+SSH is a communication protocol allowing to make operations reassured on a non-secure network. By extension it is also the program which implements this protocol.
 
+Historically he is built, in particular, to execute orders via a shell on a distant machine from a local machine. It is of her that comes his name Secure SHell.
 
+He allows to establish a connection secure and calculated between both machines then executes a shell on the distant machine in which the wanted orders are executed. The user of the local machine must be able to become identified on the distant machine as a user existing on this one.
+
+Several methods of authentification are possible.
+
+The supply/check of the password of the distant user by the local user a handshake calculated via the provision of the distant user by the local user of a public key
+
+Under Unix, to use SSH, it is simply necessary to install the package openssh for the part customer and openssh-server for the part waiter.
+
+Under Debian GNU/Linux it means executing one of the two order following as administrator (root):
 
 
 
