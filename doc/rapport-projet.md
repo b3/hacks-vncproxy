@@ -39,7 +39,7 @@ Le client VNC se connecte sur un serveur et permet d'en prendre son contrôle.
 
 ![](img/vnc-exemple.jpg)
 
-Dans le cadre de notre projet, nous avons besoin d'utiliser VNC au mode `reverse`
+Dans le cadre de notre projet, nous avons besoin d'utiliser VNC en mode `reverse`
 Ce n'est pas le client qui se connecte au serveur mais l'inverse. Le client va attendre qu'un serveur vienne se connecter à lui.
 Nous avons donc mis en place ce `reverse VNC` entre deux machines situées sur le même réseau local (sans traverser de proxy)  
 >>### Reverse VNC
