@@ -128,4 +128,37 @@ Under Debian GNU / Linux, the configuration of SSH is made via various files:
 * `/etc/ssh_host_rsa_key`: Private key of the server
 * `/etc/ssh/ssh_host_rsa_key.pub`: Public key of the server
 
+Among importants lines of the server configuration file, we can note :
 
+* `Port 22` mean the SSH server listen to the port 22 (default port of SSH). So to listen to an other port, you just have to change this line.
+* `PermitRootLogin yes` mean that a connection as `root` is possible by SSH with any authentification. Other values are possibles : 
+    * `no` : in this case `root` no connection as `root` will be possible on the server. You must log in as a normal user and use the `su` command to become `root`.
+    * `without-password` : with this value, a connection as `root` on the server is possible only if the authentification used is not with a password request (but only with keys exchange). It's the default value with an installation on Debian GNU/Linux with the `jessie` version.
+
+By default, SSH server listen to the port 22. If you want to be able to listen to an **additionnal** port, you can ask to a firewall to do the ports redirection.
+
+With Debian GNU/Linux, you can i.e. install and then use the `iptables` command.
+
+To install, you have to execute the following command :
+
+    apt-get iptables
+
+To add some rules enable to steer connections from the port 443 to the port 22 of current machine (here supposed with the IP 192.168.0.42) where the SSH server is listening, you have to execute the following commands : 
+
+    iptables -t nat -I PREROUTING --src 0/0 --dst 192.168.0.42 -p tcp --dport 443 -j REDIRECT --to-ports 22
+    iptables -t nat -I OUTPUT --src 0/0 --dst 192.168.0?42 -p tcp --dport 443 -j REDIRECT --to-ports 22
+
+To log in to a machine, you can type this command : 
+    
+    ssh [user_name]@machine  
+
+SSH use an asymetrical encryption. In opposition with the symetrical encryption, asymetrical encryption use a key to encrypt and an other key to decode.
+
+So there is two keys :
+
+* a **public** key to encrypt
+* a **private** key to decode
+
+Each user can generate his pair of keys with the command : `ssh-keygen`
+    
+This command will generate a pair of keys stored in the repertory : `~/.ssh`.
