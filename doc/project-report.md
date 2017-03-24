@@ -89,7 +89,7 @@ On the server (Windows machine), we need to install `TightVNC`. Once `TightVNC` 
 the customer was launched. We need to start `TightVNC Server`(service mode). For the reverse mode, make
 a right clik on the lower right icon in the tasks bar and clik on `attach listening viewer`.  
 
-![](img/170308023454757216.png)  
+![](img/170308023454757276.png)  
 
 A dialog box appears which one it's necessary to enter the address of the machine with which we want
 to share the connection as well as the listening port. Click on `attach` to validate.  
