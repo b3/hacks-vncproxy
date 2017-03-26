@@ -214,6 +214,19 @@ Et voila ça marche trés bien. :D
 
 
 >### Script d'automatisation
+Pour automatiser les taches j'ai écrit un petit script qui va installer corkscrew et il stabilisait une connexion ssh:
+```javascript
+#!/bin/bash
+
+
+```
+Ce script d'abord vérifie que Corkscrew est installé ou non, si oui il va stabiliser connexion SSH, sinon il va installer Corkscrew et puis stabiliser une connexion SSH.
+
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt4.png?raw=true)
+
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt5.png?raw=true)
+
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt3.png?raw=true)
 
 
 >## Connection VNC sur machine Linux
