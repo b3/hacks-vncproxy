@@ -407,6 +407,9 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 # Conclusion
 # Annexes
+
 ![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt1.png?raw=true)
+
+
 ![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt2.png?raw=true)
 
