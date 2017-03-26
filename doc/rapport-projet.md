@@ -18,21 +18,21 @@ Les données circulant entre les deux machines doivent être chiffrées.
 La procédure à mettre en place sur la machine à assister doit être la plus simple possible (accessible à un *non-informaticien*) et si possible automatisable (via un programme/script).
 
 
->## Etude des solutions
+## Etude des solutions
 
-### Reverse ssh
+> ### Reverse ssh
 
 Le principe consiste à initier une connexion depuis la machine derrière le routeur sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
 
 > Le principe de connexion à SSH est habituellement basé sur le système du Client local qui se connecte au Serveur distant. mais ici c'est le Serveur distant qui se connecte au Client local.
 
-### ngrok
+> ### ngrok
 
 Pendant mes recherche j'ai rencontré à ngrok. Après étudier ngrok j'ai compris c'est pas pour notre cas, mais comme même je veux le presenter car je le trouve trés interessent.
 
 Ngrok est un outil pratique et un service qui vous permet de tunnel demandes de l'Internet large ouvert à votre machine locale quand il est derrière un NAT ou un pare-feu. Cela est utile dans un certain nombre de cas, par exemple lorsque vous voulez tester un add-on que vous avez écrit ou un point d'extrémité webhook personnalisé pour Bitbucket, mais que vous n'avez pas encore déployé votre code sur un hôte accessible via Internet. L'utilisation la plus courante de ngrok configure un tunnel à localhost en utilisant le nom d'hôte aléatoire que ngrok fournit par défaut, par exemple ```5a3e3614.ngrok.com```. Mais ce n'est pas tout ce qu'il peut faire ... pour plus d'info je vous invite voir le site web https://ngrok.com/.
 
-### Corkscrew
+> ### Corkscrew
 
 Il est possible de faire passer une connexion SSH à travers un proxy web du moment que celui-ci autorise la méthode CONNECT. Cette méthode est utilisée lors des connexions HTTPs par exemple et sert à établir un tunnel HTTP. Il est de ce fait assez courant qu'un proxy (ou serveur mandataire) laisse passer ce genre de communication. Tant mieux car c'est ce que nous allons utiliser.
 
@@ -52,7 +52,7 @@ Nous avons tout d'abord pris connaissance le fonctionnement de corkscrew, puis l
 Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistait à passer le proxy via `corkscrew` au travers de SSH.
 
 
->## SSH au dessus du proxy HTTP/HTTPS
+## SSH au dessus du proxy HTTP/HTTPS
 
 ![](img/schema-ssh.png)
 ## Creuser un tunnel sous HTTP avec Corkscrew
@@ -92,7 +92,7 @@ Host *
    ProxyCommand /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr 3128 %h %p 
 ```
    
-> Remplacer /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr et 3128 par des valeurs correctes.
+> il faut remplacer ```/tmp/toto/bin/corkscrew``` ```cache-etu.univ-lille1.fr``` et ```3128``` par des valeurs correctes.
 
 #### Problème avec la connection au serveur avec ssh:
 
@@ -149,20 +149,20 @@ Last login: Wed Mar  8 15:42:21 2017 from cacheserv2.univ-lille1.fr
 XXX@lille:~$ 
 ```
 ### Windows --> Linux
-Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe cygwin avec les configues par defaut, puis dans terminale:
+Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe Cygwin(Pour plus d'info sur installation Cygwin je vous invite vore https://github.com/b3/hacks-vncproxy/blob/master/doc/install-cygwin.md ) avec les configues par defaut, puis dans terminale:
+
 ```javascript
 export http_proxy="http://cache-etu.univ-lille1.fr:3128"
 
 export HTTPS_PROXY="http://cache-etu.univ-lille1.fr:3128"
 ```
 Et puis comme l'environement Linux-bash:
+
 ```javascript
 wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
 ```
 Et j'ai reçue l'erreur:
 
-```
-Et j'ai reçue l'erreur:
 ```javascript
  bash make: command not found
 ```
