@@ -15,7 +15,32 @@ La procédure à mettre en place sur la machine à assister doit être la plus s
 
 
 >## Etude des solutions
->## Avantages des solutions retenues  
+
+### Reverse ssh
+
+Le principe consiste à initier une connexion depuis la machine derrière le routeur sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
+
+> Le principe de connexion à SSH est habituellement basé sur le système du Client local qui se connecte au Serveur distant. mais ici c'est le Serveur distant qui se connecte au Client local.
+
+### ngrok
+
+Pendant mes recherche j'ai rencontré à ngrok. Après étudier ngrok j'ai compris c'est pas pour notre cas, mais comme même je veux le presenter car je le trouve trés interessent.
+
+Ngrok est un outil pratique et un service qui vous permet de tunnel demandes de l'Internet large ouvert à votre machine locale quand il est derrière un NAT ou un pare-feu. Cela est utile dans un certain nombre de cas, par exemple lorsque vous voulez tester un add-on que vous avez écrit ou un point d'extrémité webhook personnalisé pour Bitbucket, mais que vous n'avez pas encore déployé votre code sur un hôte accessible via Internet. L'utilisation la plus courante de ngrok configure un tunnel à localhost en utilisant le nom d'hôte aléatoire que ngrok fournit par défaut, par exemple ```5a3e3614.ngrok.com```. Mais ce n'est pas tout ce qu'il peut faire ... pour plus d'info je vous invite voir le site web https://ngrok.com/.
+
+### Corkscrew
+
+Il est possible de faire passer une connexion SSH à travers un proxy web du moment que celui-ci autorise la méthode CONNECT. Cette méthode est utilisée lors des connexions HTTPs par exemple et sert à établir un tunnel HTTP. Il est de ce fait assez courant qu'un proxy (ou serveur mandataire) laisse passer ce genre de communication. Tant mieux car c'est ce que nous allons utiliser.
+
+Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établir une fausse connexion HTTP entre votre machine et la machine distante. Car un proxy n'est juste qu'un relai, entre une machine sur le réseau local qui demande une requête HTTP, et le serveur distant. Ce logiciel demande donc à notre proxy web, s'il peut se connecter à la machine distante pour communiquer avec elle. Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs, notre logiciel communique donc maintenant avec la machine distante et passe maintenant le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
+
+
+## Avantages des solutions retenues 
+
+L'avantage de cette méthode, c'est que la machine distante n'a pas à avoir de configuration spécifique. Le seul problème est quand le proxy web n'est pas autorisé à joindre le port 22 (ssh) sur une machine distante, car c'est assez rare que des machines s'échangent des données en HTTP avec ce port. Dans ce cas, il suffit soit de faire une redirection de port sur la machine distante ```(ip proxy => port 443 => port 22/ssh)```, soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443``` qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
+
+
+
 # Mise en oeuvre
 
 Pour mener à bien ce projet, nous avons découpé les tâches afin d'arriver au résultat final.
@@ -26,8 +51,178 @@ Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistai
 >## SSH au dessus du proxy HTTP/HTTPS
 
 ![](img/schema-ssh.png)
+## Creuser un tunnel sous HTTP avec Corkscrew
 
->>### Script d'automatisation
+### Linux --> Linux
+
+Corkscrew est un simple outil pour faire un tunnel TCP à travers un proxy HTTP. Il peut être utilisé par exemple pour se connecter à un serveur SSH, qui écoute sur le port 443, à travers un proxy HTTPS dit « strict ».
+
+#### Installation de Corkscrew
+
+Corkscrew va s’installer sur notre machine cliente.Il'y a deux maniére pour installer corkscrew:
+
+>1- Si nous sommes sur Debian c’est toujours la même mélodie :
+
+>```shirin@debian:~$ sudo apt-get install corkscrew```
+
+> > 2- Pour le construire
+
+> * nous devons le télécharer et décompresser:
+
+> ```wget http://agroman.net/corkscrew/corkscrew-2.0.tar.gz```
+	
+>    ```tar xf corkscrew-2.0.tar.gz```
+
+> * puis, dans le répertoire de corkscrew, tapez ```./configure```
+> * puis ```make```
+> * Pour l'installer dans le répertoire du corkscrew, tapez ```make install```
+
+Vous devriez trouver corkscrew dans votre gestionnaire de paquets habituels peu importe votre distribution, il existe même sur Mac port c’est vous dire.
+
+#### Comment est-il utilisé?
+
+La mise en place de corkscrew avec SSH / OpenSSH est très simple. Ajouter La ligne suivante vers votre fichier ~ / .ssh / config :
+
+``` javascript
+Host *
+   ProxyCommand /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr 3128 %h %p 
+```
+   
+> Remplacer /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr et 3128 par des valeurs correctes.
+
+#### Problème avec la connection au serveur avec ssh:
+
+malgré que la clé ssh soit correcte, je reçoie ce message d'erreur:
+
+```javascript
+ssh -vvv XXX@test.boulgour.com
+OpenSSH_6.7p1 Debian-5+deb8u3, OpenSSL 1.0.1t  3 May 2016
+debug1: Reading configuration data /home/infoetu/XXX/.ssh/config
+debug1: /home/infoetu/XXX/.ssh/config line 5: Applying options for *
+debug1: Reading configuration data /etc/ssh/ssh_config
+debug1: /etc/ssh/ssh_config line 19: Applying options for *
+debug1: Executing proxy command: exec /tmp/toto/bin/corkscrew cache-etu.univ-lille1.fr 3128 test.boulgour.com 22
+debug1: permanently_drop_suid: 1779
+debug1: identity file /home/infoetu/XXX/.ssh/id_rsa type 1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_rsa-cert type -1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_dsa type -1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_dsa-cert type -1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_ecdsa type -1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_ecdsa-cert type -1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_ed25519 type -1
+debug1: key_load_public: No such file or directory
+debug1: identity file /home/infoetu/XXX/.ssh/id_ed25519-cert type -1
+debug1: Enabling compatibility mode for protocol 2.0
+debug1: Local version string SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u3
+Proxy could not open connnection to test.boulgour.com:  Forbidden
+ssh_exchange_identification: Connection closed by remote host
+```
+je trouve que corkscrew peut être utilisé pour se connecter à un serveur SSH exécuté sur un port 443 distant via un proxy HTTPS strict.donc je pense le seul moyen pour resoudre ce problem est de changer le port ssh sur serveur distance, en ajoutant lien suivant au fichier sshd_config:
+
+```Port 443```
+
+```javascript
+ssh -vvv -X -p 443 -i -i ~/.ssh/keys/id_rsa XXX@test.boulgour.com
+```
+Et voila on est connecté:
+
+```javascript
+Enter passphrase for key '/root/.ssh/keys/id_rsa': 
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Wed Mar  8 15:42:21 2017 from cacheserv2.univ-lille1.fr
+XXX@lille:~$ 
+```
+### Windows --> Linux
+Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe cygwin avec les configues par defaut, puis dans terminale:
+```javascript
+export http_proxy="http://cache-etu.univ-lille1.fr:3128"
+
+export HTTPS_PROXY="http://cache-etu.univ-lille1.fr:3128"
+```
+Et puis comme l'environement Linux-bash:
+```javascript
+wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
+```
+Et j'ai reçue l'erreur:
+
+ command not found
+Pour résoudre ce problème j'ai suivi les étapes suivantes:
+
+Revenir à l'installateur.(cygwin.exe)
+Effectuer la configuration initiale.
+Sous bibliothèque - aller à devel.
+Sous devel scroll et trouver wget et aussi make.
+installer toute la bibliothèque avec le nom wget et make.
+Cliquer sur Suivant, prendra un certain temps pour l'installer.
+Cela résoudra le problème. J'ai relancé la commande:
+```javascript
+wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
+```
+Et j'ai reçue l'erreur:
+```javascript
+ bash make: command not found
+```
+Pour résoudre ce problème j'ai suivi les étapes suivantes:
+* Revenir à l'installateur.(cygwin.exe)
+* Effectuer la configuration initiale.
+* Sous bibliothèque - aller à devel.
+* Sous devel scroll et trouver les packets suivants:
+
+>>  * Openssh
+>>  * Bash
+>>  * Binutils
+>>  * make
+>>  * wget
+
+* Cliquer sur Suivant, prendra un certain temps pour l'installer.
+
+Cela résoudra le problème.
+J'ai relancé la commande:
+```javascript
+wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
+```
+Et puis comme l'environement linux-shell: 
+```javascript
+tar tar xfz corkscrew-2.0.tar.gz
+cd corkscrew-2.0
+./configure
+make
+make install
+```
+Pour plus d'infos sur installation corkscrew voire lien suivant:
+https://github.com/b3/hacks-vncproxy/blob/master/doc/install-config-corkscrew.md
+
+Et voilà installation corkscrew sur Windows est finie.
+
+Maintenet je dois copier ma clé publique dans répertoire .ssh:
+```javascript
+cp /cygdrive/e/usb/key-ssh/id_rsa* ~/.ssh
+```
+
+J'avais ma clé sur ma clé-USB et donc je le copiais tous simplement.
+
+Puis j'ai fait la command suivant:
+```javascript
+ssh -i ~/.ssh/id_rsa -p 443 -o "ProxyCommand /tmp/corkscrew-2.0/corkscrew.exe cache.univ-lille1.fr 3128 %h %p" XXX@test.boulgour.com
+Enter passphrase for key '/home/Utilisateur/.ssh/id_rsa':
+```
+Et voila ça marche trés bien. :D
+
+
+>### Script d'automatisation
+
 
 >## Connection VNC sur machine Linux
 >>### Virtual Network Computing (VNC)
@@ -207,4 +402,5 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 # Conclusion
 # Annexes
+
 
