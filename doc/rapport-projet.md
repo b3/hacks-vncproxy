@@ -1,7 +1,11 @@
 # Présentation
 >## Objectif du projet
 
-L'objectif principal est de mettre en place une procédure permettant de prendre le contrôle (ou de voir) l'écran d'une machine connectée à un réseau privé qui n'a accès à l'Internet que via un proxy web à partir d'une machine avec une adresse publique sur l'Internet.
+En informatique, l'accès à distance, la commande à distance ou encore le contrôle à distance sont des méthodes qui permettent, depuis un ordinateur éloigné et sans limite théorique de distance, de prendre le contrôle d'un autre ordinateur en affichant l'écran de celui-ci et en manipulant les fonctions correspondant au clavier et à la souris.
+
+Les solutions d'accès à distance vous permettent d'accéder à pratiquement n'importe quel système d'exploitation, n'importe où dans le monde, de le réparer. Les techniciens peuvent discuter avec l'utilisateur, visionner et contrôler ses systèmes et ses appareils et même collaborer avec d'autres techniciens ou intervenants externes pour résoudre rapidement tous les problèmes.
+
+L'objectif principal de ce projet est de mettre en place une procédure permettant de prendre le contrôle (ou de voir) l'écran d'une machine connectée à un réseau privé qui n'a accès à l'Internet que via un proxy web à partir d'une machine avec une adresse publique sur l'Internet.
 
 La machine à assister (celle qui offre son écran et qui est sur le réseau privé) peut fonctionner sous Linux, Windows ou Mac OS X.
 
@@ -157,18 +161,6 @@ wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
 ```
 Et j'ai reçue l'erreur:
 
- command not found
-Pour résoudre ce problème j'ai suivi les étapes suivantes:
-
-Revenir à l'installateur.(cygwin.exe)
-Effectuer la configuration initiale.
-Sous bibliothèque - aller à devel.
-Sous devel scroll et trouver wget et aussi make.
-installer toute la bibliothèque avec le nom wget et make.
-Cliquer sur Suivant, prendra un certain temps pour l'installer.
-Cela résoudra le problème. J'ai relancé la commande:
-```javascript
-wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
 ```
 Et j'ai reçue l'erreur:
 ```javascript
