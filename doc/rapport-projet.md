@@ -149,7 +149,7 @@ Last login: Wed Mar  8 15:42:21 2017 from cacheserv2.univ-lille1.fr
 XXX@lille:~$ 
 ```
 ### Windows --> Linux
-Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe Cygwin(Pour plus d'info sur installation Cygwin je vous invite vore https://github.com/b3/hacks-vncproxy/blob/master/doc/install-cygwin.md ) avec les configues par defaut, puis dans terminale:
+Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe Cygwin(Pour plus d'info sur installation Cygwin je vous invite voir https://github.com/b3/hacks-vncproxy/blob/master/doc/install-cygwin.md ) avec les configues par defaut, puis dans terminale:
 
 ```javascript
 export http_proxy="http://cache-etu.univ-lille1.fr:3128"
