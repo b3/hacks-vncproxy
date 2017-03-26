@@ -69,7 +69,7 @@ Corkscrew va s’installer sur notre machine cliente.Il'y a deux maniére pour i
 
 >```shirin@debian:~$ sudo apt-get install corkscrew```
 
-> > 2- Pour le construire
+>2- Pour le construire
 
 > * nous devons le télécharer et décompresser:
 
