@@ -184,7 +184,54 @@ Last login: Wed Mar  8 15:42:21 2017 from cacheserv2.univ-lille1.fr
 XXX@lille:~$ 
 ```
 ### Windows --> Linux
-Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe Cygwin(Pour plus d'info sur installation Cygwin je vous invite voir https://github.com/b3/hacks-vncproxy/blob/master/doc/install-cygwin.md ) avec les configues par defaut, puis dans terminale:
+Pour creuser un tunnel sous HTTP avec Corkscrew sur une machine Windows j'installe Cygwin.
+#### Cygwin: 
+Cygwin est un ensemble de programmes permettant d’émuler, dans une certaine mesure,
+un environnement linux sous windows. Il ne nécessite aucun partitionnement ou modifi-
+cation du système windows, c’est une couche supplémentaire qui tourne par dessus. Les
+performances sont donc moins bonnes, et toutes les fonctionnalités d’un système Unix
+ne sont pas reproduites.
+Il s’agit néanmoins d’un choix très judicieux si on souhaite disposer d’un environnement
+linux de base sans modification lourde de son PC windows, et sans se connecter à distance
+en permanence. Il faut cependant disposer d’une connexion internet haut débit
+pour télécharger les fichiers assez volumineux qui composent ces programmes.
+
+#### Installation Cygwin:
+Allez sur la page web d’accueil de Cygwin :
+www.cygwin.com
+Pour une première installation, suivre le lien Install ou pour une mise à jour ou des
+compléments, suivre le lien Update. Ils aboutissent tous les deux à la page :
+www.cygwin.com/install.html
+Avant de continuer, il faut savoir si on dispose d’un système Windows 32 bits ou 64
+bits : selon le cas, on doit télécharger le fichier setup-x86.exe ou setup-x86_64.exe
+(cas des systèmes les plus récents). On récupère ainsi un fichier exécutable windows qui
+permettra d’installer les différents composants de Cygwin, que ce soit pour la première
+installation ou, ultérieurement, pour l’ajout de composants. Une fois téléchargé, exécuter
+ce fichier.
+Trois possibilités sont offertes : 
+
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309050502944802.png?raw=true)
+
+a priori Install from Internet est celle qu’il vous faut.
+Ce choix demande à Cygwin de télécharger puis d’installer les fichiers que vous demanderez.
+À l’écran suivant, le "Root Directory" est le point de votre disque dur qui sera, plus tard,
+la racine (/) de votre système de fichiers cygwin. 
+
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309051246581070.png?raw=true)
+
+Le choix par défaut,est C:\cygwin,recommandé. Il est conseillé de laisser les autres options telles que recommandées, sauf si on sait ce qu’on fait...
+
+L’écran suivant demande le "Local Package Directory", c’est là qu’il stocke les fichiers compressés des composants qui seront installés. Par défaut c’est le répertoire où a été
+téléchargé setup-x86_64.exe, aussi modifiez le tel que vous le souhaitez, par exemple ```C:\cygwin_packages```
+
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309051831229773.png?raw=true)
+
+Une liste de composants s’affiche, classée par thème. Développez l’arborescence pour connaître le contenu des thèmes. Seront installés ceux qui ont un numéro de version,tandis que les autres sont ignorés ("skip"), j'ai choisi les choix par défaut.
+
+Une fois le choix fait, appuyez sur "suivant". Les éventuelles «dépendances» supplémentaires sont signalées, acceptez leur installation et continuez.
+Une fois l’installation effectuée vous disposez d’un terminal texte sous bash, comparable à celui que vous ouvrez sur les stations linux.
+
+Puis dans terminale:
 
 ```javascript
 export http_proxy="http://cache-etu.univ-lille1.fr:3128"
