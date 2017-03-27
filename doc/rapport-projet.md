@@ -20,6 +20,9 @@ La procédure à mettre en place sur la machine à assister doit être la plus s
 
 ## Etude des solutions
 
+Pour réaliser ce projet nous avons découpé les taches.
+* ### première partie c'était ssh à traverse de proxy donc nous avons trouvé les solutions suivantes :
+
 > ### Reverse ssh
 
 Le principe consiste à initier une connexion depuis la machine derrière le routeur sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
@@ -38,10 +41,40 @@ Il est possible de faire passer une connexion SSH à travers un proxy web du mom
 
 Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établir une fausse connexion HTTP entre votre machine et la machine distante. Car un proxy n'est juste qu'un relai, entre une machine sur le réseau local qui demande une requête HTTP, et le serveur distant. Ce logiciel demande donc à notre proxy web, s'il peut se connecter à la machine distante pour communiquer avec elle. Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs, notre logiciel communique donc maintenant avec la machine distante et passe maintenant le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
 
+* ### Deuxième partie c'était étudier VNC
+### Deux types de serveur VNC
+
+* Le premier consiste à prendre le contrôle du poste distant, donc à contrôler sa session ainsi que sa souris et son clavier.
+
+* Le deuxième type de serveur VNC créé une session *virtuelle* accessible par le client. Le client exploite donc les ressources du serveur pour utiliser cette session virtuelle. Il ne pourra donc pas interagir à la place du clavier et de la souris du serveur.
+
+#### Serveur libre
+
+* X11vnc : Chiffrement SSL, identifiant et mot de passe. Il permet les transferts de fichier au formats UltraVNC et TightVNC.fonctionne sur système d'exploitation Windows et Unix.
+* TightVNC serveur : chiffrement optimisé pour les connexions à faible débit. 
+* Vino : pour environnement GNOME.
+* UltraVNC : Permet l'utilisation d'un plugin open-source de chiffrement. Il permet également une identification basée sur les comptes utilisateurs NTLM et Active Directory.fonctionne sur système d'exploitation Windows et Unix.
+
+#### Client libre
+
+* GNU/Linux 
+    * tightvnc-java     
+    * vnc-java      
+    * tightvncviewer    
+    * vnc4viewer        
+* Windows
+    * UltraVNC
+* OS X 
+    * Nous pouvons utiliser l'application de partage d'écran intégrée ou accéder à cette application via Safari. Dans Safari, nous pouvons saisir `vnc://yourserverip:5901`
+
+Par défaut VNC utilise le port 5900 pour les connexions classiques du client VNC Viewer et le port 5800 pour le client VNC HTTP Java.
+
 
 ## Avantages des solutions retenues 
 
-L'avantage de cette méthode, c'est que la machine distante n'a pas à avoir de configuration spécifique. Le seul problème est quand le proxy web n'est pas autorisé à joindre le port 22 (ssh) sur une machine distante, car c'est assez rare que des machines s'échangent des données en HTTP avec ce port. Dans ce cas, il suffit soit de faire une redirection de port sur la machine distante ```(ip proxy => port 443 => port 22/ssh)```, soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443``` qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
+Pour la première partie nous avons choisi Corkscrew l'avantage de cette méthode, c'est que la machine distante n'a pas à avoir de configuration spécifique. Le seul problème est quand le proxy web n'est pas autorisé à joindre le port 22 (ssh) sur une machine distante, car c'est assez rare que des machines s'échangent des données en HTTP avec ce port. Dans ce cas, il suffit soit de faire une redirection de port sur la machine distante ```(ip proxy => port 443 => port 22/ssh)```, soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443``` qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
+
+Pour la deuxième partie nous avons chosie xtightvncviewer(client) et X11vnc(serveur) pour Linux et TightVNC(serveur) pour Windows qu'ils sont les logiciels libres, et à l'attention de notre projet nous avons décidé de mise en place reverse VNC.
 
 
 
@@ -224,7 +257,9 @@ Ce script d'abord vérifie que Corkscrew est installé ou non, si oui il va stab
 
 ![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt4.png?raw=true)
 
+
 ![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt5.png?raw=true)
+
 
 ![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt3.png?raw=true)
 
@@ -366,7 +401,7 @@ Cette commande permet de réaliser cette opération :
     
 L'utilisateur de la machine distante (le serveur SSH) possède maintenant la clé publique de l'utilisateur de la machine local (le client SSH). Les deux machines peuvent maintenant s'échanger des données chiffrées et les déchiffrer avec une authentification sécurisée sans échange de mot de passe sur le réseau.
 
->>>### SSH sur machine Linux-Linux
+>>>### VNC et SSH sur machine Linux-Linux(sans proxy)
 
 Maintenant, nous pouvons établir une connexion VNC au travers de SSH.  
 
@@ -402,8 +437,27 @@ Cette commande permet de se connecter à localhost via le port 5500.
 
 Sur l'écran du controleur, on a bien pris la main du controlé.
 
->>>### SSH sur machine Linux-Windows
+>>>### VNC et SSH sur machine Linux-Windows(sans proxy)
 
+
+
+>>>### VNC et SSH à traverse de proxy
+
+Pour finaliser notre projet nous avons faire les étapes suivants:
+
+> #### Serveur (controlé) Linux:                                              #### Client (controleur) Linux:
+* 1.Executer le script ```./corkscrew ```
+                                                                              * 2.Lancer le client vnc ```$ xvnc4viewer -listen```
+* 3.Lancé le server vnc ```$ x11vnc -connect localhost:5500```     
+
+> #### Serveur (controlé) Windows:                                            #### Client (controleur) Linux:
+* 1.Executer le script dans Cygwin```./corkscrew ```
+                                                                              * 2.Lancer le client vnc ```$ xvnc4viewer -listen```
+* 3.Clic droit sur l'icône en bas à droite dans la barre de 
+tâches et de cliquer sur attach listening viewer
+
+* 4.Entrer l'adresse de la machine avec laquelle on veut partager 
+la connexion ainsi que le port d'écoute
 
 # Conclusion
 # Annexes
@@ -412,4 +466,5 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 
 ![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt2.png?raw=true)
+
 
