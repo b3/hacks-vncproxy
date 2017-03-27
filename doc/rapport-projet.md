@@ -71,7 +71,7 @@ Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établi
 
 Par défaut VNC utilise le port 5900 pour les connexions classiques du client VNC Viewer et le port 5800 pour le client VNC HTTP Java.
 
-> ### SSH depuis la machine Windows:
+* ### SSH depuis la machine Windows:
 Pour faire SSH depuis une machine windows nous avons eu deux choix, Putty ou Cygwin.
 * Putty:
 PuTTY est un émulateur de terminal doublé d'un client pour les protocoles SSH, Telnet, rlogin, et TCP brut.
