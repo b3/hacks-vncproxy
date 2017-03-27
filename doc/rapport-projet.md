@@ -445,19 +445,29 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 Pour finaliser notre projet nous avons faire les étapes suivants:
 
-> #### Serveur (controlé) Linux:                                              #### Client (controleur) Linux:
+> #### Sur Serveur (controlé) Linux:
+```javascript                
 * 1.Executer le script ```./corkscrew ```
-                                                                              * 2.Lancer le client vnc ```$ xvnc4viewer -listen```
+                              
+> #### Sur Client (controleur) Linux:
+* 2.Lancer le client vnc ```$ xvnc4viewer -listen```
+
+> #### Sur Serveur (controlé) linux:                                                                             
 * 3.Lancé le server vnc ```$ x11vnc -connect localhost:5500```     
+```
 
-> #### Serveur (controlé) Windows:                                            #### Client (controleur) Linux:
+```javascript
+> #### Serveur (controlé) Windows:                                   
 * 1.Executer le script dans Cygwin```./corkscrew ```
-                                                                              * 2.Lancer le client vnc ```$ xvnc4viewer -listen```
-* 3.Clic droit sur l'icône en bas à droite dans la barre de 
-tâches et de cliquer sur attach listening viewer
+             
+> #### Client (controleur) Linux:                                    
+* 2.Lancer le client vnc ```$ xvnc4viewer -listen```
 
-* 4.Entrer l'adresse de la machine avec laquelle on veut partager 
-la connexion ainsi que le port d'écoute
+> #### Serveur (controlé) Windows:
+* 3.Clic droit sur l'icône en bas à droite dans la barre de tâches et de cliquer sur attach listening viewer
+
+* 4.Entrer l'adresse de la machine avec laquelle on veut partager la connexion ainsi que le port d'écoute
+```
 
 # Conclusion
 # Annexes
