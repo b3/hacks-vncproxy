@@ -18,6 +18,8 @@ Les données circulant entre les deux machines doivent être chiffrées.
 La procédure à mettre en place sur la machine à assister doit être la plus simple possible (accessible à un *non-informaticien*) et si possible automatisable (via un programme/script).
 
 
+![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/vnc-ssh.png?raw=true)
+
 ## Etude des solutions
 
 Pour réaliser ce projet nous avons découpé les taches.
