@@ -445,16 +445,17 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 Pour finaliser notre projet nous avons faire les étapes suivants:
 
-> #### Sur Serveur (controlé) Linux:
-```javascript                
+```javascript
+> #### Sur Serveur (controlé) Linux:              
 * 1.Executer le script ```./corkscrew ```
                               
 > #### Sur Client (controleur) Linux:
 * 2.Lancer le client vnc ```$ xvnc4viewer -listen```
 
 > #### Sur Serveur (controlé) linux:                                                                             
-* 3.Lancé le server vnc ```$ x11vnc -connect localhost:5500```     
+* 3.Lancé le server vnc ```$ x11vnc -connect localhost:5500```  
 ```
+
 
 ```javascript
 > #### Serveur (controlé) Windows:                                   
