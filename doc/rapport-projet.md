@@ -86,7 +86,7 @@ Pour la première partie nous avons choisi Corkscrew l'avantage de cette méthod
 
 Pour la deuxième partie nous avons chosie xtightvncviewer(client) et X11vnc(serveur) pour Linux et TightVNC(serveur) pour Windows qu'ils sont les logiciels libres, et à l'attention de notre projet nous avons décidé de mise en place reverse VNC.
 
-Pour SSH depuis notre machine Windows nous avons décidé d'installer Cygwin car elle est trop proche d'environement Linux et nous pouvons execute 
+Pour SSH depuis notre machine Windows nous avons décidé d'installer Cygwin car elle est trop proche d'environement Linux. 
 
 # Mise en oeuvre
 
