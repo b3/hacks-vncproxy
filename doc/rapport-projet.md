@@ -254,7 +254,7 @@ wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
 Et j'ai reçue l'erreur:
 
 ```javascript
- bash make: command not found
+bash make: command not found
 ```
 Pour résoudre ce problème j'ai suivi les étapes suivantes:
 * Revenir à l'installateur.(cygwin.exe)
@@ -277,7 +277,7 @@ wget http://www.agroman.net/corkscrew/corkscrew-2.0.tar.gz
 ```
 Et puis comme l'environement linux-shell: 
 ```javascript
-tar tar xfz corkscrew-2.0.tar.gz
+tar xfz corkscrew-2.0.tar.gz
 cd corkscrew-2.0
 ./configure
 make
