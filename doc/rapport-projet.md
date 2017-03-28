@@ -2,7 +2,7 @@
 # Projet Universitaire
 ## Administration à distance à travers un proxy HTTP/HTTPS
 
-![](hhtps://image.noelshack.com/fichiers/2017/13/1490707945-page1.jpg)
+![](https://image.noelshack.com/fichiers/2017/13/1490707945-page1.jpg)
 
 ### Canivez Jean
 ### Legrand Florian
