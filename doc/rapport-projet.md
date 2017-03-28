@@ -22,42 +22,69 @@ La procédure à mettre en place sur la machine à assister doit être la plus s
 
 ## Etude des solutions
 
-Pour réaliser ce projet nous avons découpé les taches.
-* ### première partie c'était ssh à traverse de proxy donc nous avons trouvé les solutions suivantes :
+Pour l'étude des solutions et du projet, nous l'avons découpé en différente partie.
+
+* ### 1ère partie : Trouver un outils permettant de traverser le proxy avec SSH.
 
 > ### Reverse ssh
 
-Le principe consiste à initier une connexion depuis la machine derrière le routeur sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
+Le principe consiste à initier une connexion depuis la machine derrière le proxy sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
 
 > Le principe de connexion à SSH est habituellement basé sur le système du Client local qui se connecte au Serveur distant. mais ici c'est le Serveur distant qui se connecte au Client local.
 
 > ### ngrok
 
-Pendant mes recherche j'ai rencontré à ngrok. Après étudier ngrok j'ai compris c'est pas pour notre cas, mais comme même je veux le presenter car je le trouve trés interessent.
-
-Ngrok est un outil pratique et un service qui vous permet de tunnel demandes de l'Internet large ouvert à votre machine locale quand il est derrière un NAT ou un pare-feu. Cela est utile dans un certain nombre de cas, par exemple lorsque vous voulez tester un add-on que vous avez écrit ou un point d'extrémité webhook personnalisé pour Bitbucket, mais que vous n'avez pas encore déployé votre code sur un hôte accessible via Internet. L'utilisation la plus courante de ngrok configure un tunnel à localhost en utilisant le nom d'hôte aléatoire que ngrok fournit par défaut, par exemple ```5a3e3614.ngrok.com```. Mais ce n'est pas tout ce qu'il peut faire ... pour plus d'info je vous invite voir le site web https://ngrok.com/.
+Pendant nos recherches,nous avons découvert `ngrok`. Après avoir étudié `ngrok`, nous avons compris
+ que ce n'était pas adapté à notre projet. Néanmois, il reste très intéressant.
+`Ngrok` est un logiciel couplé à un service web qui permet de créer un tunnel à partir d'internet vers
+ un port de notre choix sur la machine local.
+Il permet par exemple de partager un site web en cours de développement sur la machine local
+avec n'importe qui à travers le monde.
+L'application va créer un tunnel et va fournir un adresse du type **xxxx.ngrok.com**.
+Il faut juste communiquer cette adresse aux personnes que l'on souhaite partager
+et l'ouvrir depuis son navigateur. Lorsque la requête web arrive sur le serveur de **ngrok**,
+ce dernier redirige le sous-domaine **xxxx** vers votre machine. C'est ce qu'on appelle
+ un **reverse proxy**
+Pour plus de rensignement, je vous invite à consulter le site web https://ngrok.com/.
 
 > ### Corkscrew
 
-Il est possible de faire passer une connexion SSH à travers un proxy web du moment que celui-ci autorise la méthode CONNECT. Cette méthode est utilisée lors des connexions HTTPs par exemple et sert à établir un tunnel HTTP. Il est de ce fait assez courant qu'un proxy (ou serveur mandataire) laisse passer ce genre de communication. Tant mieux car c'est ce que nous allons utiliser.
+Il est possible de faire passer une connexion SSH à travers un proxy web du moment que
+celui-ci autorise la méthode CONNECT. Cette méthode est utilisée lors des connexions HTTPs
+par exemple et permet d'établir un tunnel HTTP.
+Il est assez courant qu'un proxy (ou serveur mandataire) laisse passer ce genre de communication.
+C'est la solution que nous avons retenue.
+Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établir
+une fausse connexion HTTP entre votre machine et la machine distante. 
+Car un proxy n'est juste qu'un relai, entre une machine sur le réseau local qui demande 
+une requête HTTP, et le serveur distant. Ce logiciel demande donc à notre proxy web
+s'il peut se connecter à la machine distante pour communiquer avec elle.
+Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs,
+notre logiciel communique donc maintenant avec la machine distante et passe maintenant
+le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
 
-Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établir une fausse connexion HTTP entre votre machine et la machine distante. Car un proxy n'est juste qu'un relai, entre une machine sur le réseau local qui demande une requête HTTP, et le serveur distant. Ce logiciel demande donc à notre proxy web, s'il peut se connecter à la machine distante pour communiquer avec elle. Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs, notre logiciel communique donc maintenant avec la machine distante et passe maintenant le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
-
-* ### Deuxième partie c'était étudier VNC
+* ### 2ème partie : L'étude de VNC
 ### Deux types de serveur VNC
 
-* Le premier consiste à prendre le contrôle du poste distant, donc à contrôler sa session ainsi que sa souris et son clavier.
+* Le premier consiste à prendre le contrôle du poste distant, donc à contrôler sa session
+ainsi que sa souris et son clavier.
 
-* Le deuxième type de serveur VNC créé une session *virtuelle* accessible par le client. Le client exploite donc les ressources du serveur pour utiliser cette session virtuelle. Il ne pourra donc pas interagir à la place du clavier et de la souris du serveur.
+* Le deuxième type de serveur VNC créer une session *virtuelle* accessible par le client.
+Le client exploite donc les ressources du serveur pour utiliser cette session virtuelle. 
+Il ne pourra donc pas intéragir à la place du clavier et de la souris du serveur.
 
-#### Serveur libre
+#### Serveur libre :
 
-* X11vnc : Chiffrement SSL, identifiant et mot de passe. Il permet les transferts de fichier au formats UltraVNC et TightVNC.fonctionne sur système d'exploitation Windows et Unix.
+* X11vnc : Chiffrement SSL, identifiant et mot de passe. Il permet les transferts de fichier 
+au formats UltraVNC et TightVNC. Celui-ci fonctionne sur les systèmes d'exploitation Windows et Unix.
 * TightVNC serveur : chiffrement optimisé pour les connexions à faible débit. 
+Ce service fonctionne sur Windows.   
 * Vino : pour environnement GNOME.
-* UltraVNC : Permet l'utilisation d'un plugin open-source de chiffrement. Il permet également une identification basée sur les comptes utilisateurs NTLM et Active Directory.fonctionne sur système d'exploitation Windows et Unix.
+* UltraVNC : Permet l'utilisation d'un plugin open-source de chiffrement. 
+Il permet également une identification basée sur les comptes utilisateurs NTLM et Active Directory. 
+Il fonctionne sur les systèmes d'exploitation Windows et Unix.
 
-#### Client libre
+### Client libre
 
 * GNU/Linux 
     * tightvnc-java     
