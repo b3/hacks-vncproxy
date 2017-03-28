@@ -101,19 +101,32 @@ Par défaut VNC utilise le port 5900 pour les connexions classiques du client VN
 * ### SSH depuis la machine Windows:
 Pour faire SSH depuis une machine windows nous avons eu deux choix, Putty ou Cygwin.
 * Putty:
-PuTTY est un émulateur de terminal doublé d'un client pour les protocoles SSH, Telnet, rlogin, et TCP brut.
+PuTTY est un émulateur de terminal doublé d'un client pour les protocoles SSH, Telnet, rlogin
+et TCP brut.
 
 
 * Cygwin:
-Cygwin est une collection de logiciels libres à l'origine développés par Cygnus Solutions permettant à différentes versions de Windows de Microsoft d'émuler un système Unix.
+Cygwin est une collection de logiciels libres à l'origine développés par Cygnus Solutions
+permettant à différentes versions de Windows de Microsoft d'émuler un système Unix.
 
 ## Avantages des solutions retenues 
 
-Pour la première partie nous avons choisi Corkscrew l'avantage de cette méthode, c'est que la machine distante n'a pas à avoir de configuration spécifique. Le seul problème est quand le proxy web n'est pas autorisé à joindre le port 22 (ssh) sur une machine distante, car c'est assez rare que des machines s'échangent des données en HTTP avec ce port. Dans ce cas, il suffit soit de faire une redirection de port sur la machine distante ```(ip proxy => port 443 => port 22/ssh)```, soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443``` qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
+Pour effectuer le tunnel à travers le proxy, nous avons choisi Corkscrew.   
+L'avantage principal est que la machine distante n'a pas de configuration spécifique à faire. 
+Le seul problème que l'on peut rencontrer concerne le proxy web. Si il n 'est pasforcément
+autorisé à joindre le port 22 (ssh) sur une machine distante mais cela reste assez rare que des
+machines s'échangent des données en HTTP avec ce port. 
+Dans ce cas, il suffit soit de faire une redirection de port sur la 
+machine distante ```(ip proxy => port 443 => port 22/ssh)```,
+soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443```
+qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
 
-Pour la deuxième partie nous avons chosie xtightvncviewer(client) et X11vnc(serveur) pour Linux et TightVNC(serveur) pour Windows qu'ils sont les logiciels libres, et à l'attention de notre projet nous avons décidé de mise en place reverse VNC.
+Pour la seconde partie, nous avons choisi xtightvncviewer(client) et X11vnc(serveur) pour Linux
+et TightVNC(serveur) pour Windows. Ce sont tous des logiciels libres.
+Pour le bon fonctionnement de notre projet, nous avons décidé de mettre en place VNC en mode `reverse`.
 
-Pour SSH depuis notre machine Windows nous avons décidé d'installer Cygwin car elle est trop proche d'environement Linux. 
+Pour utiliser SSH depuis notre machine Windows, nous avons décidé d'installer Cygwin. Ce logiciel
+permet d'émuluer un environnement UNIX sur une machine Windows. 
 
 # Mise en oeuvre
 
