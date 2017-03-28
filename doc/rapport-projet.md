@@ -24,7 +24,7 @@ La procédure à mettre en place sur la machine à assister doit être la plus s
 
 Pour l'étude des solutions et du projet, nous l'avons découpé en différente partie.
 
-* ### 1ère partie : Trouver un outils permettant de traverser le proxy avec SSH.
+* 1ère partie : Trouver un outils permettant de traverser le proxy avec SSH.
 
 > ### Reverse ssh
 
@@ -63,7 +63,7 @@ Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs
 notre logiciel communique donc maintenant avec la machine distante et passe maintenant
 le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
 
-* ### 2ème partie : L'étude de VNC
+* 2ème partie : L'étude de VNC
 ### Deux types de serveur VNC
 
 * Le premier consiste à prendre le contrôle du poste distant, donc à contrôler sa session
@@ -362,7 +362,9 @@ Ce script d'abord vérifie que Corkscrew est installé ou non, si oui il va stab
 
 
 >## Connection VNC sur machine Linux
->>### Virtual Network Computing (VNC)
+>>### Virtual Network Computing (VNC)  
+
+
 Virtual Network Computing (VNC) est un logiciel utilisé pour se connecter à un ordinateur distant.
 Il permet de transmettre les saisies au clavier ainsi que les clics de la souris d'un ordinateur à l'autre.  
 Cela permet tout simplement de prendre le contrôle d'une machine distante qu'elle soit en local ou par le biais d'internet.  
@@ -601,4 +603,5 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt2.png)
 
+![](https://image.noelshack.com/fichiers/2017/13/1490705556-recapitulatif.png)
 
