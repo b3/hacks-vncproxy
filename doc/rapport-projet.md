@@ -18,7 +18,7 @@ Les données circulant entre les deux machines doivent être chiffrées.
 La procédure à mettre en place sur la machine à assister doit être la plus simple possible (accessible à un *non-informaticien*) et si possible automatisable (via un programme/script).
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/vnc-ssh.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702553-vnc-ssh.png)
 
 ## Etude des solutions
 
@@ -137,7 +137,7 @@ Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistai
 
 ## SSH au dessus du proxy HTTP/HTTPS
 
-![](img/schema-ssh.png)
+![](https://image.noelshack.com/fichiers/2017/13/1490702551-schema-ssh.png)
 ## Creuser un tunnel sous HTTP avec Corkscrew
 
 ### Linux --> Linux
@@ -258,21 +258,21 @@ installation ou, ultérieurement, pour l’ajout de composants. Une fois téléc
 ce fichier.
 Trois possibilités sont offertes : 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309050502944802.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170309050502944802.png)
 
 a priori Install from Internet est celle qu’il vous faut.
 Ce choix demande à Cygwin de télécharger puis d’installer les fichiers que vous demanderez.
 À l’écran suivant, le "Root Directory" est le point de votre disque dur qui sera, plus tard,
 la racine (/) de votre système de fichiers cygwin. 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309051246581070.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170309051246581070.png)
 
 Le choix par défaut,est C:\cygwin,recommandé. Il est conseillé de laisser les autres options telles que recommandées, sauf si on sait ce qu’on fait...
 
 L’écran suivant demande le "Local Package Directory", c’est là qu’il stocke les fichiers compressés des composants qui seront installés. Par défaut c’est le répertoire où a été
 téléchargé setup-x86_64.exe, aussi modifiez le tel que vous le souhaitez, par exemple ```C:\cygwin_packages```
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309051831229773.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170309051831229773.png)
 
 Une liste de composants s’affiche, classée par thème. Développez l’arborescence pour connaître le contenu des thèmes. Seront installés ceux qui ont un numéro de version,tandis que les autres sont ignorés ("skip"), j'ai choisi les choix par défaut.
 
@@ -352,13 +352,13 @@ Pour automatiser les taches j'ai écrit un petit script qui va installer corkscr
 ```
 Ce script d'abord vérifie que Corkscrew est installé ou non, si oui il va stabiliser connexion SSH, sinon il va installer Corkscrew et puis stabiliser une connexion SSH.
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt4.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt4.png)
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt5.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702551-capt5.png)
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt3.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt3.png)
 
 
 >## Connection VNC sur machine Linux
@@ -369,7 +369,7 @@ Cela permet tout simplement de prendre le contrôle d'une machine distante qu'el
 Pour l'utiliser, nous avons besoin d'un `client VNC` ainsi qu'un `serveur VNC`.
 Le client VNC se connecte sur un serveur et permet d'en prendre son contrôle.
 
-![](img/vnc-exemple.jpg)
+![](https://image.noelshack.com/fichiers/2017/13/1490702553-vnc-exemple.jpg)
 
 Dans le cadre de notre projet, nous avons besoin d'utiliser VNC en mode `reverse`
 Ce n'est pas le client qui se connecte au serveur mais l'inverse. Le client va attendre qu'un serveur vienne se connecter à lui.
@@ -384,7 +384,7 @@ Ensuite, il faut éxécuter la commande :
 ```
  `xvncviewer -listen`
 ```
-![](img/vnc-reverse.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702553-vnc-reverse.png)  
 
 Cette commande permet au client d'écouter sur le port `5500` et attend qu'un serveur vienne écouter sur ce même port afin d'établir la connection.  
 Maintenant, il faut lancer le serveur sur l'autre machine.  *
@@ -412,16 +412,16 @@ $ xvncviewer -listen
 ```
 Le client va écouter sur le port `5500` et attendre qu'un serveur lui diffuse son écran.  
    
-![](img/170308023935483815.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170308023935483815.png)  
 
 Sur le serveur (machine Windows), il faut installer `Tight VNC`  
 Une fois `TightVNC` installé et le client lancé, il faut démarrer `TightVNC Server(service mode)`. Pour le fonctionnement en reverse, il faut faire un clic droit sur l'icône en bas à droite dans la barre  de tâches et de cliquer sur `attach listening viewer`  
-![](img/170308023454757276.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170308023454757276.png)  
 
 Une boîte de dialogue apparaît dans laquelle il faut entrer l'adresse de la machine avec laquelle on veut partager la connexion
 ainsi que le port d'écoute. Cliquer sur `attach` pour valider.  
 
-![](img/170308023726311449.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170308023726311449.png)  
 
 Le `reverse vnc` fonctionne à présent sur Linux et Windows.  
 L'étape suivante consiste à éxécuter le `reverse VNC` au travers de ssh.  
@@ -502,7 +502,7 @@ L'utilisateur de la machine distante (le serveur SSH) possède maintenant la cl�
 
 Maintenant, nous pouvons établir une connexion VNC au travers de SSH.  
 
-![](img/ssh_sans_proxy.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702552-ssh-sans-proxy.png)  
 
 La conexion SSH se fera dans un premier temps sur le même réseau local.  
 Il y a 3 étapes pour établir la connexion vnc au travers de vnc.  
@@ -596,9 +596,9 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 # Conclusion
 # Annexes
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt1.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt1.png)
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt2.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt2.png)
 
 
