@@ -659,10 +659,5 @@ prêt de la machine Windows et leurs conseils.
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt2.png)
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 33005bbf7ddaaab3cf24f7356741be733facc8ae
 ![](https://image.noelshack.com/fichiers/2017/13/1490705556-recapitulatif.png)
 
