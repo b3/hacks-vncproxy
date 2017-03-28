@@ -9,23 +9,6 @@
 ### Zohari Fatemeh
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Présentation
 >## Objectif du projet
 
@@ -648,7 +631,15 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 
 # Conclusion
 
-
+Ce projet nous a permis de découvrir à maîtriser des outils aux administrateurs systèmes comme VNC,
+corkscrew, cygwin... Nous avons pu répondre à la problématique qui était de pouvoir prendre le contrôle
+d'un pc à distance situé derrière un proxy. Nous seront sûrement amenés à faire ce genre de manipulation
+dans notre futur métier d'administrateur systèmes et réseaux.
+Ce projet nous a également permis de travailler en équipe tout en se partageant les tâches. Nous avons
+aussi appris à manipuler l'outils GIT. Celui-ci nous a permis de mettre en commun nos travaux et de voir
+l'avancement du projet.
+Nous tenons à remercier M.Beaufils pour son encadrement, ainsi que les administrateur de l'IUT pour le
+prêt de la machine Windows et leurs conseils.
 
 # Annexes
 
@@ -656,6 +647,7 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt2.png)
+
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490705556-recapitulatif.png)
 
