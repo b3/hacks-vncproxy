@@ -162,3 +162,65 @@ So there is two keys :
 Each user can generate his pair of keys with the command : `ssh-keygen`
     
 This command will generate a pair of keys stored in the repertory : `~/.ssh`.
+
+By default, the file `id_rsa` has the private key in and the file `id_rsa.pub` has the public key in.
+
+When keys are generated, to use handshake authetification, you have to copy le public key in the user's file `~/.ssh/authorized_keys` on the machine where we want to remotly connect.
+
+The next command allow you to realize this operation :
+
+    ssh-copy-id -i ~/.ssh/id_rsa.pub login@server_machine_name
+
+
+The distant machine user (SSH server) now have the local machine user's public key (SSH client). Now the two machines can exchange encrypted data and decode it with a securised authentification without password exchange on the network.
+
+>>>### SSH on Linux-Linux machines
+  
+Now, we can do a VNC connection through SSH.
+
+![](img/ssh_sans_proxy.png)  
+
+First, the SSH connection will be on the same local network.  
+
+There is 3 steps to etablish the VNC connection through SSH.
+  
+**1st step:** 
+
+The SSH connection must be done from the controled by this command :
+
+```
+$ ssh -R 5500:[@ip_controler]:[5500] localhost
+```
+`-R`: allow you to specify what arrived on the distant machine (controler) 5500 port will be transfer to the local machine (controled) through the 5500 port.
+ 
+At this stage, a SSH connection is etablish between the two machines.
+ 
+
+**2nd step :**  
+
+On the distant machine (controler), you have to start the vnc client. It will listen to the 5500 port and wait to a server broadcast on this same port.
+
+
+	$ xvnc4viewer -listen  
+  
+
+The controler's manipulations are now finished.  
+
+**3rd step :**  
+
+
+Now we have to start the vnc server on the `controled`.
+
+	$ x11vnc -connect localhost:5500  
+
+
+This command allow you to connect to localhost through the 5500 port.
+
+
+On the controler screen, we took the control of the controled.
+
+>>>### SSH on Linux-Windows machines
+
+
+# Conclusion
+# Annexes

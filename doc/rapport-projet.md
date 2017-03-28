@@ -1,3 +1,31 @@
+
+# Projet Universitaire
+## Administration à distance à travers un proxy HTTP/HTTPS
+
+![](https://image.noelshack.com/fichiers/2017/13/1490707945-page1.jpg)
+
+### Canivez Jean
+### Legrand Florian
+### Zohari Fatemeh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Présentation
 >## Objectif du projet
 
@@ -18,46 +46,73 @@ Les données circulant entre les deux machines doivent être chiffrées.
 La procédure à mettre en place sur la machine à assister doit être la plus simple possible (accessible à un *non-informaticien*) et si possible automatisable (via un programme/script).
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/vnc-ssh.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702553-vnc-ssh.png)
 
 ## Etude des solutions
 
-Pour réaliser ce projet nous avons découpé les taches.
-* ### première partie c'était ssh à traverse de proxy donc nous avons trouvé les solutions suivantes :
+Pour l'étude des solutions et du projet, nous l'avons découpé en différente partie.
+
+* 1ère partie : Trouver un outils permettant de traverser le proxy avec SSH.
 
 > ### Reverse ssh
 
-Le principe consiste à initier une connexion depuis la machine derrière le routeur sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
+Le principe consiste à initier une connexion depuis la machine derrière le proxy sur une machine tierce, et ainsi permettre une connexion retour depuis la machine tierce qui ne sera pas bloquée. Cette façon de procéder est très utile pour dépanner quelqu'un à distance qui aura juste à initier la connexion sortante en tapant une ligne depuis le terminal, sans avoir à configurer le pare-feu/routeur/BOX. Il n'est également pas nécessaire de connaitre l'adresse IP de la machine distante ni d'effectuer un routage de la connexion.
 
 > Le principe de connexion à SSH est habituellement basé sur le système du Client local qui se connecte au Serveur distant. mais ici c'est le Serveur distant qui se connecte au Client local.
 
 > ### ngrok
 
-Pendant mes recherche j'ai rencontré à ngrok. Après étudier ngrok j'ai compris c'est pas pour notre cas, mais comme même je veux le presenter car je le trouve trés interessent.
-
-Ngrok est un outil pratique et un service qui vous permet de tunnel demandes de l'Internet large ouvert à votre machine locale quand il est derrière un NAT ou un pare-feu. Cela est utile dans un certain nombre de cas, par exemple lorsque vous voulez tester un add-on que vous avez écrit ou un point d'extrémité webhook personnalisé pour Bitbucket, mais que vous n'avez pas encore déployé votre code sur un hôte accessible via Internet. L'utilisation la plus courante de ngrok configure un tunnel à localhost en utilisant le nom d'hôte aléatoire que ngrok fournit par défaut, par exemple ```5a3e3614.ngrok.com```. Mais ce n'est pas tout ce qu'il peut faire ... pour plus d'info je vous invite voir le site web https://ngrok.com/.
+Pendant nos recherches,nous avons découvert `ngrok`. Après avoir étudié `ngrok`, nous avons compris
+ que ce n'était pas adapté à notre projet. Néanmois, il reste très intéressant.
+`Ngrok` est un logiciel couplé à un service web qui permet de créer un tunnel à partir d'internet vers
+ un port de notre choix sur la machine local.
+Il permet par exemple de partager un site web en cours de développement sur la machine local
+avec n'importe qui à travers le monde.
+L'application va créer un tunnel et va fournir un adresse du type **xxxx.ngrok.com**.
+Il faut juste communiquer cette adresse aux personnes que l'on souhaite partager
+et l'ouvrir depuis son navigateur. Lorsque la requête web arrive sur le serveur de **ngrok**,
+ce dernier redirige le sous-domaine **xxxx** vers votre machine. C'est ce qu'on appelle
+ un **reverse proxy**
+Pour plus de rensignement, je vous invite à consulter le site web https://ngrok.com/.
 
 > ### Corkscrew
 
-Il est possible de faire passer une connexion SSH à travers un proxy web du moment que celui-ci autorise la méthode CONNECT. Cette méthode est utilisée lors des connexions HTTPs par exemple et sert à établir un tunnel HTTP. Il est de ce fait assez courant qu'un proxy (ou serveur mandataire) laisse passer ce genre de communication. Tant mieux car c'est ce que nous allons utiliser.
+Il est possible de faire passer une connexion SSH à travers un proxy web du moment que
+celui-ci autorise la méthode CONNECT. Cette méthode est utilisée lors des connexions HTTPs
+par exemple et permet d'établir un tunnel HTTP.
+Il est assez courant qu'un proxy (ou serveur mandataire) laisse passer ce genre de communication.
+C'est la solution que nous avons retenue.
+Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établir
+une fausse connexion HTTP entre votre machine et la machine distante. 
+Car un proxy n'est juste qu'un relai, entre une machine sur le réseau local qui demande 
+une requête HTTP, et le serveur distant. Ce logiciel demande donc à notre proxy web
+s'il peut se connecter à la machine distante pour communiquer avec elle.
+Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs,
+notre logiciel communique donc maintenant avec la machine distante et passe maintenant
+le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
 
-Pour nous faciliter cette tâche, il existe un utilitaire qui s'occupe d'établir une fausse connexion HTTP entre votre machine et la machine distante. Car un proxy n'est juste qu'un relai, entre une machine sur le réseau local qui demande une requête HTTP, et le serveur distant. Ce logiciel demande donc à notre proxy web, s'il peut se connecter à la machine distante pour communiquer avec elle. Le serveur proxy s'exécute en pensant qu'il va s'agir d'une communication HTTPs, notre logiciel communique donc maintenant avec la machine distante et passe maintenant le relai à la commande ssh. Cet utilitaire s'appelle ```corkscrew```.
-
-* ### Deuxième partie c'était étudier VNC
+* 2ème partie : L'étude de VNC
 ### Deux types de serveur VNC
 
-* Le premier consiste à prendre le contrôle du poste distant, donc à contrôler sa session ainsi que sa souris et son clavier.
+* Le premier consiste à prendre le contrôle du poste distant, donc à contrôler sa session
+ainsi que sa souris et son clavier.
 
-* Le deuxième type de serveur VNC créé une session *virtuelle* accessible par le client. Le client exploite donc les ressources du serveur pour utiliser cette session virtuelle. Il ne pourra donc pas interagir à la place du clavier et de la souris du serveur.
+* Le deuxième type de serveur VNC créer une session *virtuelle* accessible par le client.
+Le client exploite donc les ressources du serveur pour utiliser cette session virtuelle. 
+Il ne pourra donc pas intéragir à la place du clavier et de la souris du serveur.
 
-#### Serveur libre
+#### Serveur libre :
 
-* X11vnc : Chiffrement SSL, identifiant et mot de passe. Il permet les transferts de fichier au formats UltraVNC et TightVNC.fonctionne sur système d'exploitation Windows et Unix.
+* X11vnc : Chiffrement SSL, identifiant et mot de passe. Il permet les transferts de fichier 
+au formats UltraVNC et TightVNC. Celui-ci fonctionne sur les systèmes d'exploitation Windows et Unix.
 * TightVNC serveur : chiffrement optimisé pour les connexions à faible débit. 
+Ce service fonctionne sur Windows.   
 * Vino : pour environnement GNOME.
-* UltraVNC : Permet l'utilisation d'un plugin open-source de chiffrement. Il permet également une identification basée sur les comptes utilisateurs NTLM et Active Directory.fonctionne sur système d'exploitation Windows et Unix.
+* UltraVNC : Permet l'utilisation d'un plugin open-source de chiffrement. 
+Il permet également une identification basée sur les comptes utilisateurs NTLM et Active Directory. 
+Il fonctionne sur les systèmes d'exploitation Windows et Unix.
 
-#### Client libre
+### Client libre
 
 * GNU/Linux 
     * tightvnc-java     
@@ -74,19 +129,32 @@ Par défaut VNC utilise le port 5900 pour les connexions classiques du client VN
 * ### SSH depuis la machine Windows:
 Pour faire SSH depuis une machine windows nous avons eu deux choix, Putty ou Cygwin.
 * Putty:
-PuTTY est un émulateur de terminal doublé d'un client pour les protocoles SSH, Telnet, rlogin, et TCP brut.
+PuTTY est un émulateur de terminal doublé d'un client pour les protocoles SSH, Telnet, rlogin
+et TCP brut.
 
 
 * Cygwin:
-Cygwin est une collection de logiciels libres à l'origine développés par Cygnus Solutions permettant à différentes versions de Windows de Microsoft d'émuler un système Unix.
+Cygwin est une collection de logiciels libres à l'origine développés par Cygnus Solutions
+permettant à différentes versions de Windows de Microsoft d'émuler un système Unix.
 
 ## Avantages des solutions retenues 
 
-Pour la première partie nous avons choisi Corkscrew l'avantage de cette méthode, c'est que la machine distante n'a pas à avoir de configuration spécifique. Le seul problème est quand le proxy web n'est pas autorisé à joindre le port 22 (ssh) sur une machine distante, car c'est assez rare que des machines s'échangent des données en HTTP avec ce port. Dans ce cas, il suffit soit de faire une redirection de port sur la machine distante ```(ip proxy => port 443 => port 22/ssh)```, soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443``` qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
+Pour effectuer le tunnel à travers le proxy, nous avons choisi Corkscrew.   
+L'avantage principal est que la machine distante n'a pas de configuration spécifique à faire. 
+Le seul problème que l'on peut rencontrer concerne le proxy web. Si il n 'est pasforcément
+autorisé à joindre le port 22 (ssh) sur une machine distante mais cela reste assez rare que des
+machines s'échangent des données en HTTP avec ce port. 
+Dans ce cas, il suffit soit de faire une redirection de port sur la 
+machine distante ```(ip proxy => port 443 => port 22/ssh)```,
+soit de lancer le démon ssh en écoute sur un autre port. Il suffira de choisir le port ```443```
+qui correspond habituellement au HTTPs pour être tranquille avec ce genre de filtrage.
 
-Pour la deuxième partie nous avons chosie xtightvncviewer(client) et X11vnc(serveur) pour Linux et TightVNC(serveur) pour Windows qu'ils sont les logiciels libres, et à l'attention de notre projet nous avons décidé de mise en place reverse VNC.
+Pour la seconde partie, nous avons choisi xtightvncviewer(client) et X11vnc(serveur) pour Linux
+et TightVNC(serveur) pour Windows. Ce sont tous des logiciels libres.
+Pour le bon fonctionnement de notre projet, nous avons décidé de mettre en place VNC en mode `reverse`.
 
-Pour SSH depuis notre machine Windows nous avons décidé d'installer Cygwin car elle est trop proche d'environement Linux. 
+Pour utiliser SSH depuis notre machine Windows, nous avons décidé d'installer Cygwin. Ce logiciel
+permet d'émuluer un environnement UNIX sur une machine Windows. 
 
 # Mise en oeuvre
 
@@ -97,7 +165,7 @@ Nous avons ensuite couplé les deux protocoles. Et la dernière étape consistai
 
 ## SSH au dessus du proxy HTTP/HTTPS
 
-![](img/schema-ssh.png)
+![](https://image.noelshack.com/fichiers/2017/13/1490702551-schema-ssh.png)
 ## Creuser un tunnel sous HTTP avec Corkscrew
 
 ### Linux --> Linux
@@ -218,21 +286,21 @@ installation ou, ultérieurement, pour l’ajout de composants. Une fois téléc
 ce fichier.
 Trois possibilités sont offertes : 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309050502944802.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170309050502944802.png)
 
 a priori Install from Internet est celle qu’il vous faut.
 Ce choix demande à Cygwin de télécharger puis d’installer les fichiers que vous demanderez.
 À l’écran suivant, le "Root Directory" est le point de votre disque dur qui sera, plus tard,
 la racine (/) de votre système de fichiers cygwin. 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309051246581070.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170309051246581070.png)
 
 Le choix par défaut,est C:\cygwin,recommandé. Il est conseillé de laisser les autres options telles que recommandées, sauf si on sait ce qu’on fait...
 
 L’écran suivant demande le "Local Package Directory", c’est là qu’il stocke les fichiers compressés des composants qui seront installés. Par défaut c’est le répertoire où a été
 téléchargé setup-x86_64.exe, aussi modifiez le tel que vous le souhaitez, par exemple ```C:\cygwin_packages```
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/170309051831229773.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170309051831229773.png)
 
 Une liste de composants s’affiche, classée par thème. Développez l’arborescence pour connaître le contenu des thèmes. Seront installés ceux qui ont un numéro de version,tandis que les autres sont ignorés ("skip"), j'ai choisi les choix par défaut.
 
@@ -305,31 +373,56 @@ Et voila ça marche trés bien. :D
 
 >### Script d'automatisation
 Pour automatiser les taches j'ai écrit un petit script qui va installer corkscrew et il stabilisait une connexion ssh:
-```javascript
+```
 #!/bin/bash
+read -p "Enter address your proxy: " proxy
+read -p "Enter port for your proxy: " port
+if [ -x $HOME/src/corkscrew-2.0 ]; then
+	echo "It's cool, Corkscrew is install in your machine!!!"
+else
+	echo "Installation corkscrew.../n"
+	echo "Waiting please.../n"
+	set -e
+	mkdir $HOME/src
+	cd $HOME/src
+	export http_proxy=http://$proxy:$port
+	wget http://agroman.net/corkscrew/corkscrew-2.0.tar.gz
+	tar xf corkscrew-2.0.tar.gz
+	cd corkscrew-2.0
+	./configure --prefix=$HOME
+	make
+	make install
+	cd .. && rm -rf corkscrew-2.0 corkscrew-2.0.tar.gz
+fi
 
+read -p "Enter your user@servername.com: " server
+read -p "Enter your directoru for key: " key
+ssh -XC -i $key/id_rsa  -p 443 $server -o "ProxyCommand $HOME/src/corkscrew $proxy $port %h %p"
 
 ```
-Ce script d'abord vérifie que Corkscrew est installé ou non, si oui il va stabiliser connexion SSH, sinon il va installer Corkscrew et puis stabiliser une connexion SSH.
+Ce script vérifie que Corkscrew est installé ou non, si oui il va initier une connexion SSH,
+sinon Corkscrew n'est pas installé, il va l'installer et puis effectuerla connexion SSH.
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt4.png?raw=true)
-
-
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt5.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt4.png)
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt3.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702551-capt5.png)
+
+
+![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt3.png)
 
 
 >## Connection VNC sur machine Linux
->>### Virtual Network Computing (VNC)
+>>### Virtual Network Computing (VNC)  
+
+
 Virtual Network Computing (VNC) est un logiciel utilisé pour se connecter à un ordinateur distant.
 Il permet de transmettre les saisies au clavier ainsi que les clics de la souris d'un ordinateur à l'autre.  
 Cela permet tout simplement de prendre le contrôle d'une machine distante qu'elle soit en local ou par le biais d'internet.  
 Pour l'utiliser, nous avons besoin d'un `client VNC` ainsi qu'un `serveur VNC`.
 Le client VNC se connecte sur un serveur et permet d'en prendre son contrôle.
 
-![](img/vnc-exemple.jpg)
+![](https://image.noelshack.com/fichiers/2017/13/1490702553-vnc-exemple.jpg)
 
 Dans le cadre de notre projet, nous avons besoin d'utiliser VNC en mode `reverse`
 Ce n'est pas le client qui se connecte au serveur mais l'inverse. Le client va attendre qu'un serveur vienne se connecter à lui.
@@ -344,7 +437,7 @@ Ensuite, il faut éxécuter la commande :
 ```
  `xvncviewer -listen`
 ```
-![](img/vnc-reverse.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702553-vnc-reverse.png)  
 
 Cette commande permet au client d'écouter sur le port `5500` et attend qu'un serveur vienne écouter sur ce même port afin d'établir la connection.  
 Maintenant, il faut lancer le serveur sur l'autre machine.  *
@@ -372,16 +465,16 @@ $ xvncviewer -listen
 ```
 Le client va écouter sur le port `5500` et attendre qu'un serveur lui diffuse son écran.  
    
-![](img/170308023935483815.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170308023935483815.png)  
 
 Sur le serveur (machine Windows), il faut installer `Tight VNC`  
 Une fois `TightVNC` installé et le client lancé, il faut démarrer `TightVNC Server(service mode)`. Pour le fonctionnement en reverse, il faut faire un clic droit sur l'icône en bas à droite dans la barre  de tâches et de cliquer sur `attach listening viewer`  
-![](img/170308023454757276.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170308023454757276.png)  
 
 Une boîte de dialogue apparaît dans laquelle il faut entrer l'adresse de la machine avec laquelle on veut partager la connexion
 ainsi que le port d'écoute. Cliquer sur `attach` pour valider.  
 
-![](img/170308023726311449.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702548-170308023726311449.png)  
 
 Le `reverse vnc` fonctionne à présent sur Linux et Windows.  
 L'étape suivante consiste à éxécuter le `reverse VNC` au travers de ssh.  
@@ -462,7 +555,7 @@ L'utilisateur de la machine distante (le serveur SSH) possède maintenant la cl�
 
 Maintenant, nous pouvons établir une connexion VNC au travers de SSH.  
 
-![](img/ssh_sans_proxy.png)  
+![](https://image.noelshack.com/fichiers/2017/13/1490702552-ssh-sans-proxy.png)  
 
 La conexion SSH se fera dans un premier temps sur le même réseau local.  
 Il y a 3 étapes pour établir la connexion vnc au travers de vnc.  
@@ -474,7 +567,6 @@ $ ssh -R 5500:[@ip_contrôleur]:[5500] localhost
 ```
 `-R`: permet de spécifier que tout ce qui arrive sur le port 5500 de la machine distante (controleur) sera transféré sur la machine local (controlé) via le port 5500  
 
-A ce stade, une connexion ssh est établie entre les deux machines. 
 
 **2ème étape :**  
 
@@ -496,8 +588,35 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 >>>### VNC et SSH sur machine Linux-Windows(sans proxy)
 
+Il faut maintenant établir une connexion VNC au travers de SSH entre machine Windows -Linux.
 
+Sur le controlé (machine Windows), nous avons installé `Cygwin`. Ce logiciel va permettre de lancer
+la connexion SSH.
 
+Comme vue précédemment, il y a 3 étapes pour établir la connexion.  
+
+**1ère étape**
+
+La connexion ssh doit se faire à partir du contrôlé (machine Windows)
+
+Depuis `Cygwin`, lancer la commande suivante:
+```
+$ ssh -R 5500:[@ip_contrôleur]:5500 localhost
+```
+
+**2ème étape**
+
+Sur le contrôleur, il faut lancer le client VNC :
+```
+$ xvnc4viewer -listen
+```
+
+**3ème étape**
+
+Il faut lancer le serveur VNC sur le contrôlé (Windows).
+
+Il suffit d'effectuer les mêmes étapes situé dans la section **Connection VNC sur machine Windows**
+Et c'est terminé !
 >>>### VNC et SSH à traverse de proxy
 
 Pour finaliser notre projet nous avons faire les étapes suivants:
@@ -528,11 +647,15 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 ```
 
 # Conclusion
+
+
+
 # Annexes
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt1.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt1.png)
 
 
-![](https://github.com/b3/hacks-vncproxy/blob/master/doc/img/capt2.png?raw=true)
+![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt2.png)
 
+![](https://image.noelshack.com/fichiers/2017/13/1490705556-recapitulatif.png)
 
