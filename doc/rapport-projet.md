@@ -243,8 +243,15 @@ je trouve que corkscrew peut être utilisé pour se connecter à un serveur SSH 
 ```Port 443```
 
 ```javascript
-ssh -vvv -X -p 443 -i -i ~/.ssh/keys/id_rsa XXX@test.boulgour.com
+ssh -vvv -X -p 443  -i ~/.ssh/keys/id_rsa XXX@test.boulgour.com
+
+X: Active la transmission X11.
+v: verbose mode,Cause que ssh imprime des messages de débogage sur sa progression. Cela est utile pour déboguer les problèmes de connexion, d'authentification et de configuration. Multiple -v Options augmentent la verbosité. Le maximum est 3.
+i: Sélectionne un fichier à partir duquel l'identité (clé privée) pour l'authentification par clé publique est lue.
+p: Port à connecter à l'hôte distant.
+
 ```
+
 Et voila on est connecté:
 
 ```javascript
@@ -373,6 +380,7 @@ Et voila ça marche trés bien. :D
 
 >### Script d'automatisation
 Pour automatiser les taches j'ai écrit un petit script qui va installer corkscrew et il stabilisait une connexion ssh:
+
 ```
 #!/bin/bash
 read -p "Enter address your proxy: " proxy
@@ -406,7 +414,9 @@ sinon Corkscrew n'est pas installé, il va l'installer et puis effectuerla conne
 ![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt4.png)
 
 
+
 ![](https://image.noelshack.com/fichiers/2017/13/1490702551-capt5.png)
+
 
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt3.png)
@@ -655,7 +665,10 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 ![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt1.png)
 
 
+
 ![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt2.png)
+
+
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490705556-recapitulatif.png)
 
