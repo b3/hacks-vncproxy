@@ -345,12 +345,35 @@ Et voila ça marche trés bien. :D
 
 >### Script d'automatisation
 Pour automatiser les taches j'ai écrit un petit script qui va installer corkscrew et il stabilisait une connexion ssh:
-```javascript
+```
 #!/bin/bash
+read -p "Enter address your proxy: " proxy
+read -p "Enter port for your proxy: " port
+if [ -x $HOME/src/corkscrew-2.0 ]; then
+	echo "It's cool, Corkscrew is install in your machine!!!"
+else
+	echo "Installation corkscrew.../n"
+	echo "Waiting please.../n"
+	set -e
+	mkdir $HOME/src
+	cd $HOME/src
+	export http_proxy=http://$proxy:$port
+	wget http://agroman.net/corkscrew/corkscrew-2.0.tar.gz
+	tar xf corkscrew-2.0.tar.gz
+	cd corkscrew-2.0
+	./configure --prefix=$HOME
+	make
+	make install
+	cd .. && rm -rf corkscrew-2.0 corkscrew-2.0.tar.gz
+fi
 
+read -p "Enter your user@servername.com: " server
+read -p "Enter your directoru for key: " key
+ssh -XC -i $key/id_rsa  -p 443 $server -o "ProxyCommand $HOME/src/corkscrew $proxy $port %h %p"
 
 ```
-Ce script d'abord vérifie que Corkscrew est installé ou non, si oui il va stabiliser connexion SSH, sinon il va installer Corkscrew et puis stabiliser une connexion SSH.
+Ce script vérifie que Corkscrew est installé ou non, si oui il va initier une connexion SSH,
+sinon Corkscrew n'est pas installé, il va l'installer et puis effectuerla connexion SSH.
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490702550-capt4.png)
 
@@ -596,6 +619,9 @@ Pour finaliser notre projet nous avons faire les étapes suivants:
 ```
 
 # Conclusion
+
+
+
 # Annexes
 
 ![](https://image.noelshack.com/fichiers/2017/13/1490702549-capt1.png)
