@@ -514,7 +514,6 @@ $ ssh -R 5500:[@ip_contrôleur]:[5500] localhost
 ```
 `-R`: permet de spécifier que tout ce qui arrive sur le port 5500 de la machine distante (controleur) sera transféré sur la machine local (controlé) via le port 5500  
 
-A ce stade, une connexion ssh est établie entre les deux machines. 
 
 **2ème étape :**  
 
@@ -536,8 +535,35 @@ Sur l'écran du controleur, on a bien pris la main du controlé.
 
 >>>### VNC et SSH sur machine Linux-Windows(sans proxy)
 
+Il faut maintenant établir une connexion VNC au travers de SSH entre machine Windows -Linux.
+
+Sur le controlé (machine Windows), nous avons installé `Cygwin`. Ce logiciel va permettre de lancer
+la connexion SSH.
+
+Comme vue précédemment, il y a 3 étapes pour établir la connexion.  
+
+**1ère étape**
+
+La connexion ssh doit se faire à partir du contrôlé (machine Windows)
+
+Depuis `Cygwin`, lancer la commande suivante:
+```
+$ ssh -R 5500:[@ip_contrôleur]:5500 localhost
 
 
+**2ème étape**
+
+Sur le contrôleur, il faut lancer le client VNC :
+```
+$ xvnc4viewer -listen
+```
+
+**3ème étape**
+
+Il faut lancer le serveur VNC sur le contrôlé (Windows).
+
+Il suffit d'effectuer les mêmes étapes situé dans la section **Connection VNC sur machine Windows**
+Et c'est terminé !
 >>>### VNC et SSH à traverse de proxy
 
 Pour finaliser notre projet nous avons faire les étapes suivants:
