@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
 # Convertit un fichier markdown en une présentation via LaTeX/Beamer
-# Copyright (C) 2016 Bruno BEAUFILS
+# Copyright (C) 2016-2017 Bruno BEAUFILS
 #
 # usage: md2beamer [OPTIONS] SOURCE [FICHIERS-INCLUS...] 
 #
 # md2beamer est un wrapper autour de pandoc qui permet de convertir un fichier
 # au format Markdown en un diaporama PDF via LaTeX et Beamer.
 #
-# SOURCE est le fichier au format Markdown source de la présentation qui doit
-# avoir comme suffixe '.md'. Si la présentation inclus d'autres fichiers
-# (images, etc.) on doit les spécifier à la suite. Les formats d'images
-# utilisables sont pdf ou png.
+# SOURCE est le fichier au format Markdown source de la présentation. Le
+# fichier doit avoir comme suffixe '.md'. Les diapositives sont les sections
+# de niveau 2, avec le titre de la section comme titre de diapositive.
+#
+# Si la présentation inclus d'autres fichiers on doit les spécifier à la
+# suite. On peut, par exemple, spécifier des fichiers images, des modèles
+# remplaçants ceux utilisés par le script (modèle pandoc, thème beamer, etc.)
+# ou des répertoires complets.
+#
+# Les formats d'images utilisables sont uniquement pdf (pour du vectoriel) et
+# png ou éventuellement jpg (pour du matriciel). Les extensions d'images
+# '.svg' dans SOURCE sont remplacés automatiquement en '.pdf'. Les images sont
+# alignées horizontalement en s'assurant qu'elles tiennent sur la largeur de
+# la diapositive.
 #
 # OPTIONS
 #
@@ -23,6 +33,7 @@
 #     -c, --check          vérifie la présence des outils nécessaires
 #     -l, --list-debian    liste les paquets Debian nécessaires
 #     -d, --debug          conserve le répertoire de travail (/tmp/md2beamer)
+#     -V, --version        affiche la version du script
 #
 # EXEMPLES
 #
@@ -34,10 +45,18 @@
 #
 #     md2beamer presentation.md image.pdf
 #
-# DEPENDANCES
+# Convertir le fichier slides.md qui inclut des images du répertoire img
+#
+#     md2beamer slides.md img/image1.pdf img/image2.png
+#
+# Convertir le fichier slides.md qui inclut des images du répertoire img
+#
+#     md2beamer slides.md img
+#
+# DEPENDANCES/LIMITATIONS
 #
 # Pour fonctionner md2beamer a besoin que 'pandoc' ainsi qu'une installation
-# TeX (avec 'pdflatex' et la classe 'beamer.cls') soit accessible. Seul la
+# TeX (avec 'pdflatex' et la classe 'beamer.cls') soit accessible. Seule la
 # distribution TeXLive disponible pour Unix (sous le nom MacTeX pour Mac OS X)
 # a été testée.
 #
@@ -45,6 +64,12 @@
 # [texlive]: http://tug.org/texlive
 # [mactex]: http://tug.org/mactex
 #
+# Avec les dépendances spécifiées, en l'état ce script ne peut pas fonctionner
+# complètement sous MacOS X car il utilise des options spécifiques aux
+# versions GNU des commandes UNIX classiques.
+
+# TODO: expliciter extensions markdown supportées
+
 # DETAILS TECHNIQUES
 #
 # Les autres fichiers nécessaires (thèmes beamer, logos) sont embaqués en fin
@@ -65,10 +90,15 @@
 # l'extraire) ou base64 --decode (quand le contenu du fichier est binaire et
 # qu'on l'a embarqué en base64).
 
-# FIXME: SOURCE et FICHIERS-INCLUS devraient pouvoir être un chemin quelconque (absolu par exemple)
+# CONVENTIONS DE CODAGE
+#
+# Quand on ajoute/modifie quelque chose il faut penser à un fonctionnement
+# sous Linux **et** BSD (e.g. MacOS X). Il faut par exemple être
+# précautionneux avec les options de commandes Unix classiques qui sont
+# souvent différentes. Dans l'idéal il faudrait penser POSIX.
 
 # FreeBSD et GNU n'ont pas la même option pour activer les ERE dans sed
-# FIXME: ne marche pas si le sed disponible est strictement POSIX (aka ni GNU, ni FreeBSD)
+# TODO: probleme si le sed disponible est strictement POSIX (aka ni GNU, ni FreeBSD)
 if sed v </dev/null >/dev/null 2>&1 ; then
     _sed() { sed -r "$@" ; }    # GNU
 else
@@ -86,6 +116,7 @@ need () { die "$1 is unavailable" ; }
 check ()
 {
     mute which pandoc || need pandoc
+    mute which tar || need tar
     mute which base64 || need base64 coreutils
     mute which pdflatex || need pdflatex texlive-latex-base
     mute kpsewhich beamer.cls || need beamer.cls texlive-latex-recommended
@@ -122,6 +153,7 @@ list-themes ()
 
 ##############################################################################
 
+VERSION=1.0-beta1
 LATEX_ONLY=false
 DEBUG=false
 THEME=lille1
@@ -135,6 +167,7 @@ while [ ! -z "$1" ] ;
 do
     case "$1" in
         "-h"|"--help") doc && exit ;;
+        "-V"|"--version") echo $VERSION && exit ;;
         "-c"|"--check") check && exit ;;
         "-l"|"--list-debian")
             egrep '\|\| need' $0 | _sed 's/^.* (.*)$/\1/'
@@ -171,7 +204,7 @@ do
     extract-file $TMPDIR $f
 done
 
-[ $# -ne 0 ] && cp $* $TMPDIR
+[ $# -ne 0 ] && { tar -cf - "$@" | tar -C $TMPDIR -xf - ; }
 
 $LATEX_ONLY || cd $TMPDIR
 
@@ -185,8 +218,14 @@ pandoc -s \
        --slide-level=$SLIDELEVEL \
        $SRC > $dsttex
 
+ _sed -i \
+      -e '/\\begin\{document\}/,$ s!\\includegraphics(\[[^]]*\]|)\{([^}]*).svg\}!\\includegraphics\1{\2.pdf}!g' \
+      -e '/\\begin\{document\}/,$ s!(\\includegraphics(\[[^]]*\]|)\{[^}]*\})!\\centerline{\1}!g' \
+     $dsttex
+
 if ! $LATEX_ONLY ; then
     trap "die $PWD/$dsttex: compilation failure" ERR
+    export TEXINPUTS=.//:
     pdflatex -halt-on-error $dsttex 1>/dev/null 2>&1
     pdflatex -halt-on-error $dsttex 1>/dev/null 2>&1
 
@@ -532,7 +571,7 @@ Ugo+PgpzdGFydHhyZWYKOTQ0OQolJUVPRgo=
 \usepackage{fixltx2e}           % provides \textsubscript
 \usepackage{fancyvrb}
 
-\usepackage{listings}           % pour les
+\usepackage{listings}           % pour les programmes
 $if(graphics)$
 \usepackage{graphicx,grffile}
 \makeatletter
@@ -553,21 +592,21 @@ $endif$
 $if(theme)$\usetheme{$theme$}$endif$
 %\setbeameroption{show notes on second screen} % les notes sur le second écran
 
-\AtBeginPart{
-  \let\insertpartnumber\relax
-  \let\partname\relax
-  \frame{\partpage}
-}
-\AtBeginSection{
-  \let\insertsectionnumber\relax
-  \let\sectionname\relax
-  \frame{\sectionpage}
-}
-\AtBeginSubsection{
-  \let\insertsubsectionnumber\relax
-  \let\subsectionname\relax
-  \frame{\subsectionpage}
-}
+%\AtBeginPart{
+%  \let\insertpartnumber\relax
+%  \let\partname\relax
+%  \frame{\partpage}
+%}
+%\AtBeginSection{
+%  \let\insertsectionnumber\relax
+%  \let\sectionname\relax
+%  \frame{\sectionpage}
+%}
+%\AtBeginSubsection{
+%  \let\insertsubsectionnumber\relax
+%  \let\subsectionname\relax
+%  \frame{\subsectionpage}
+%}
 
 % Méta-données du document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
