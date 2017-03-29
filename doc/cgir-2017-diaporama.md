@@ -6,7 +6,8 @@
 # Introduction
 
 ## Objectif
-
+- prendre le contrôle la machine(réseau privé) dériére un proxy web à partir une machine(adresse publique)
+- La machine à assister peut fonctionner sous Linux, Windows ou Mac.
 - Outils sous licence libre
 - Données circulent chiffrées
 - Le plus simple possible (accessible à un non-informaticien) 
@@ -28,13 +29,13 @@
 ## Reverse VNC
 
 Inverser rôle serveur/client
-- client attend
-- serveur se connecte
+- Client attend
+- Serveur se connecte
 
 Outils
 
-- côté client : xtightvncviewer
-- côté serveur : x11vnc/TightVNC
+- Côté client : xtightvncviewer
+- Côté serveur : x11vnc/TightVNC
 
 Linux > Linux
 
@@ -51,12 +52,12 @@ Windows > Linux
 
 ## Problèmes
 
-- seul communication possible
-    - du serveur vers le client
+- Seul communication possible
+    - Du serveur vers le client
     - HTTP ou HTTPS
-    - via un proxy
-- contraintes
-    - communication doit être chiffrée
+    - Via un proxy
+- Contraintes
+    - Communication doit être chiffrée
 
 **Faire passer flux SSH au dessus d'un proxy HTTP/HTTPS**
 
@@ -114,6 +115,6 @@ Remerciements
 
 - A Mr Beaufils et Mr Peter
 - Les administrateurs de l'IUT pour le prêt de matériel 
-- Thibeuf Antoine pour la finalisation
+- Thibeuf Antoine pour la finalisation de diaporama
 
 
