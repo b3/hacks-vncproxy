@@ -202,7 +202,7 @@ mkdir -p $TMPDIR
 
 list-files $THEME | while read f
 do
-    extract-file $TMPDIR $f
+    extract-file $TMPDIR $THEME $f
 done
 
 [ $# -ne 0 ] && { tar -cf - "$@" | tar -C $TMPDIR -xf - ; }
