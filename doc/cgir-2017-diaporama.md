@@ -1,7 +1,5 @@
 % Administration à distance à travers un proxy HTTP/HTTPS
-
 % Fatemeh Zohari ; Florian Legrand ; Jean Canivez
-
 % 30 Mars 2017
 
 
@@ -18,14 +16,18 @@
 
 # VNC
 
-![](img/vnc-exemple.jpg)
+## VNC
 
 ### Virtual Network Computing
 
 - Côté client :  xtightvncviewer
 - Côté serveur : x11vnc
 
-# Reverse VNC: Linux - Linux
+![](img/vnc-exemple.jpg)
+
+# Reverse VNC
+
+## Reverse VNC
 
 ###  Linux - Linux
 
@@ -35,7 +37,6 @@
 - Client : $ xvnc4viewer -listen
 - Serveur : $ x11vnc -connect 172.18.48.231:5500
 
-# Reverse VNC: Linux - Wndows
 
 ### Linux - Windows
 
@@ -45,48 +46,65 @@
 
 # SSH au dessus du proxy HTTP/HTTPS
 
-### CORKSCREW
+## SSH au dessus du proxy HTTP/HTTPS
 
-- Introduction
-- Avantage
-- Désavantage
-- Installation de corkscrew
-- Configuration de corkscrew				
-- Script
+### Outils
+- Choix d'utiliser Corksrew
 
-# SSH au dessus du proxy HTTP/HTTPS: LINUX vers LINUX
+### Avantage
+- Facilité d'installation et de configuration
+
+### Désavantage
+- Besoin d'une redirection de port 
+
+### Configuration
+- Modification du fichier .ssh/config				
+- Rédaction de script
+
+
+## SSH au dessus du proxy HTTP/HTTPS
 
 ### LINUX vers LINUX
 
-- Installation corkscrew
-- Configuration
-- Script(./corkscrew)
-
-# SSH au dessus du proxy HTTP/HTTPS: WINDOWS vers LINUX
+- Installation et configuration de Corkscrew
+- Via deux choix possible : Manuellement ou via un script
+- Choix de la méthode via un script d'éxécution (gain de productivité et accessibilité)
 
 ### WINDOWS vers LINUX
 
-- Installation Cygwin
-- Installation Corkscrew
-- Configuration
-- Script
+- Installation Cygwin et Corkscrew
+- Mêmes cas et choix que pour Linux
 
 
 # Administration à distance à travers un proxy HTTP/HTTPS
 
+## Administration à distance à travers un proxy HTTP/HTTPS
+
+
 ![](img/vnc-ssh.png)
 
+##
 
 ![](img/conclution.png)
 
 
 
-# Conclution
+# Conclusion
 
 ## Conclusion
 
-###
+### 
 
--Prendre le contrôle d'un pc à distance situé derrière un proxy
+- Prendre le contrôle d'un pc à distance situé derrière un proxy
 
--Découverte de nouveaux outils (Corkscrew, Gygwin, ...)
+- Découverte de nouveaux outils de collaboration et d'administration
+
+- Gain en capacités
+
+### Remerciements
+
+- A Mr Beaufils et Mr Peter
+- Les administrateurs de l'IUT pour le prêt de matériel 
+- Thibeuf Antoine pour la finalisation
+
+
