@@ -377,8 +377,8 @@ read -p "Enter port for your proxy: " port
 if [ -x $HOME/src/corkscrew-2.0 ]; then
 	echo "It's cool, Corkscrew is install in your machine!!!"
 else
-	echo "Installation corkscrew.../n"
-	echo "Waiting please.../n"
+	echo "Installation corkscrew...\n"
+	echo "Waiting please...\n"
 	set -e
 	mkdir $HOME/src
 	cd $HOME/src
@@ -617,7 +617,8 @@ Il faut lancer le serveur VNC sur le contrôlé (Windows).
 
 Il suffit d'effectuer les mêmes étapes situé dans la section **Connection VNC sur machine Windows**
 Et c'est terminé !
->>>### VNC et SSH à traverse de proxy
+
+### VNC et SSH à traverse de proxy
 
 Pour finaliser notre projet nous avons faire les étapes suivants:
 
