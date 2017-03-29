@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Convertit un fichier markdown en une présentation via LaTeX/Beamer
-# Copyright (C) 2016-2017 Bruno BEAUFILS
+# Convertit un fichier markdown en un rapport via LaTeX
+# Copyright (C) 2017 Bruno BEAUFILS
 #
-# usage: md2beamer [OPTIONS] SOURCE [FICHIERS-INCLUS...] 
+# usage: md2report [OPTIONS] SOURCE [FICHIERS-INCLUS...] 
 #
-# md2beamer est un wrapper autour de pandoc qui permet de convertir un fichier
-# au format Markdown en un diaporama PDF via LaTeX et Beamer.
+# md2report est un wrapper autour de pandoc qui permet de convertir un fichier
+# au format Markdown en un rapport PDF via LaTeX. L'outil est essentiellement
+# prévu pour les projets et stages d'étudiants.
 #
-# SOURCE est le fichier au format Markdown source de la présentation. Le
-# fichier doit avoir comme suffixe '.md'. Les diapositives sont les sections
-# de niveau 2, avec le titre de la section comme titre de diapositive.
+# SOURCE est le fichier au format Markdown source du rapport. Le fichier doit
+# avoir comme suffixe '.md'.
 #
-# Si la présentation inclus d'autres fichiers on doit les spécifier à la
-# suite. On peut, par exemple, spécifier des fichiers images, des modèles
-# remplaçants ceux utilisés par le script (modèle pandoc, thème beamer, etc.)
-# ou des répertoires complets.
+# Si le rapport inclus d'autres fichiers on doit les spécifier à la suite. On
+# peut, par exemple, spécifier des fichiers images, des modèles remplaçants
+# ceux utilisés par le script (modèle pandoc, etc.)  ou des répertoires
+# complets.
 #
 # Les formats d'images utilisables sont uniquement pdf (pour du vectoriel) et
 # png ou éventuellement jpg (pour du matriciel). Les extensions d'images
@@ -25,40 +25,39 @@
 # OPTIONS
 #
 #     -h, --help           affiche ce message d'aide
-#     -t, --theme THEME    utilise THEME pour la forme du diaporama au lieu de
+#     -t, --theme THEME    utilise THEME pour la forme du rapport au lieu de
 #                          lille1. 'list' permet de lister les thèmes.
 #     -s, --slide-level N  spéficie le niveau de titre qui définit une diapo
 #                          au lieu du niveau 2
 #     -L, --latex          produit le source LaTeX plutôt que le résultat PDF
 #     -c, --check          vérifie la présence des outils nécessaires
 #     -l, --list-debian    liste les paquets Debian nécessaires
-#     -d, --debug          conserve le répertoire de travail (/tmp/md2beamer)
+#     -d, --debug          conserve le répertoire de travail (/tmp/md2report)
 #     -V, --version        affiche la version du script
 #
 # EXEMPLES
 #
 # Vérifier que les outils nécessaires sont disponibles sur la machine :
 #
-#     md2beamer -c
+#     md2report -c
 #
-# Convertir le fichier presentation.md qui inclut l'image image.pdf
+# Convertir le fichier rapport.md qui inclut l'image image.pdf
 #
-#     md2beamer presentation.md image.pdf
+#     md2report rapport.md image.pdf
 #
-# Convertir le fichier slides.md qui inclut des images du répertoire img
+# Convertir le fichier rapport.md qui inclut des images du répertoire img
 #
-#     md2beamer slides.md img/image1.pdf img/image2.png
+#     md2report rapport.md img/image1.pdf img/image2.png
 #
-# Convertir le fichier slides.md qui inclut des images du répertoire img
+# Convertir le fichier rapport.md qui inclut des images du répertoire img
 #
-#     md2beamer slides.md img
+#     md2report rapport.md img
 #
 # DEPENDANCES/LIMITATIONS
 #
-# Pour fonctionner md2beamer a besoin que 'pandoc' ainsi qu'une installation
-# TeX (avec 'pdflatex' et la classe 'beamer.cls') soit accessible. Seule la
-# distribution TeXLive disponible pour Unix (sous le nom MacTeX pour Mac OS X)
-# a été testée.
+# Pour fonctionner md2report a besoin que 'pandoc' ainsi qu'une installation
+# TeX (avec 'pdflatex') soit accessible. Seule la distribution TeXLive
+# disponible pour Unix (sous le nom MacTeX pour Mac OS X) a été testée.
 #
 # [pandoc]: http://pandoc.org
 # [texlive]: http://tug.org/texlive
@@ -69,10 +68,11 @@
 # versions GNU des commandes UNIX classiques.
 
 # TODO: expliciter extensions markdown supportées
+# TODO: switch to shembed
 
 # DETAILS TECHNIQUES
 #
-# Les autres fichiers nécessaires (thèmes beamer, logos) sont embaqués en fin
+# Les autres fichiers nécessaires (modèle pandoc, logos) sont embarqués en fin
 # de script (pour pouvoir diffuser le script et rien d'autre). L'embarquement
 # est fait entre deux lignes sous la forme :
 #
@@ -119,7 +119,6 @@ check ()
     mute which tar || need tar
     mute which base64 || need base64 coreutils
     mute which pdflatex || need pdflatex texlive-latex-base
-    mute kpsewhich beamer.cls || need beamer.cls texlive-latex-recommended
 }
 
 # extrait un fichier embarqué dans le script
@@ -158,7 +157,7 @@ VERSION=0.1-20170329-1650
 LATEX_ONLY=false
 DEBUG=false
 THEME=lille1
-TMPDIR=/tmp/md2beamer
+TMPDIR=/tmp/md2report
 SLIDELEVEL=2
 DESTDIR=$PWD
 
@@ -210,13 +209,11 @@ done
 $LATEX_ONLY || cd $TMPDIR
 
 pandoc -s \
-       -f markdown_github+yaml_metadata_block+pandoc_title_block-implicit_figures+link_attributes \
-       --toc \
-       -t beamer \
-       --template=$TMPDIR/beamer-pandoc.tex \
-       -V theme=$THEME \
+       -f markdown_github+yaml_metadata_block-implicit_figures+link_attributes \
+       -t latex \
+	   --chapters \
+       --template=$TMPDIR/latex-pandoc.tex \
        -V fontsize=10 \
-       --slide-level=$SLIDELEVEL \
        $SRC > $dsttex
 
  _sed -i \
@@ -239,121 +236,7 @@ $DEBUG || { cd .. ; rm -rf $TMPDIR ; }
 
 exit 0
 
-# begin-lille1 beamerthemelille1.sty cat
-% Un thème Beamer pour l'Université de Lille 1
-% Copyright (C) 2015-2016 Bruno BEAUFILS
-% This file is distributed under the terms of the WTFPL license.
-
-% Paramétrages génériques %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Les couleurs de Lille 1
-\definecolor{Lille1Pourpre}{RGB}{174,37,115}      % en HTML : ae2573
-\definecolor{Lille1NeutreNoir}{RGB}{56,47,45}     % en HTML : 382f2d
-\definecolor{Lille1NeutreBleu}{RGB}{127,160,172}  % en HTML : 7fa0ac
-\definecolor{Lille1NeutreRose}{RGB}{216,200,209}  % en HTML : d8c8d1
-\definecolor{Lille1FroideBleu}{RGB}{29,66,138}    % en HTML : 1d428a
-\definecolor{Lille1FroideVert}{RGB}{0,179,152}    % en HTML : 00b398
-\definecolor{Lille1FroideCyan}{RGB}{141,200,232}  % en HTML : 8dc8e8
-\definecolor{Lille1ChaudeViolet}{RGB}{114,0,98}   % en HTML : 720062
-\definecolor{Lille1ChaudeMarron}{RGB}{211,130,53} % en HTML : d38235
-\definecolor{Lille1ChaudeTaupe}{RGB}{213,203,159} % en HTML : d5cb9f
-\definecolor{Lille1ViveRouge}{RGB}{249,66,58}     % en HTML : f9423a
-\definecolor{Lille1ViveVert}{RGB}{120,190,32}     % en HTML : 78be20
-\definecolor{Lille1ViveJaune}{RGB}{252,227,0}     % en HTML : fce300
-
-%% La police Lille 1 n'est pas libre (Verdana) on prend le truc le plus proche
-\usepackage[scaled=.92]{helvet}
-
-%% Paramétrage hyperref
-\hypersetup{%
-  colorlinks,%
-  linkcolor=,%
-  urlcolor=Lille1Pourpre}
-  
-% Paramétrage Beamer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\mode<presentation>             % pour le mode présentation seulement
-
-%% Logos
-\titlegraphic{%
-  \raisebox{-0.5\height}{\includegraphics[width=6em]{logo-univ-lille1}}
-}
-\logo{\includegraphics[height=1.5em]{logo-univ-lille1}}
-
-%% Couleurs
-\usecolortheme{spruce}
-\setbeamercolor{normal text}{fg=Lille1NeutreNoir}
-\setbeamercolor{structure}{fg=black}
-\setbeamercolor{frametitle}{fg=white,bg=Lille1Pourpre}
-\setbeamercolor{title}{fg=Lille1Pourpre,bg=white}
-\setbeamercolor{subtitle}{fg=Lille1NeutreBleu}
-\setbeamercolor{footline}{fg=white,bg=Lille1Pourpre}
-\setbeamercolor{block title}{fg=white,bg=Lille1Pourpre}
-\setbeamercolor{block body}{fg=Lille1NeutreNoir,bg=Lille1NeutreRose}
-\setbeamercolor{block title example}{fg=white,bg=Lille1NeutreBleu}
-\setbeamercolor{block body example}{fg=Lille1NeutreNoir,bg=Lille1NeutreRose}
-\setbeamercolor{alerted text}{fg=Lille1Pourpre}
-
-%% Polices de caractères
-%\usefonttheme[stillsansseriftext]{serif}
-\usefonttheme[onlylarge]{structurebold}
-\setbeamerfont{date in head/foot}{series=\bfseries}
-\setbeamerfont{date}{series=\bfseries}
-\setbeamerfont{alerted text}{series=\bfseries}
-
-%% Traduction en français
-\uselanguage{french}
-\languagepath{french}
-\deftranslation[to=french]{Definition}{Définition}
-\deftranslation[to=french]{Example}{Exemple}
-\deftranslation[to=french]{Theorem}{Théorème}
-
-%% Adaptation des modèles
-
-%%% Sections dans la table des matières
-\setbeamertemplate{sections/subsections in toc}[sections numbered]
-
-%%% Une page simple (avec table des matières) devant chaque section
-\setbeamertemplate{section page}{\tableofcontents[currentsection,subsubsectionstyle=show/show/show/shaded]}
-%\AtBeginSection[]{\frame{\sectionpage}}
-
-%%% Styles des blocs
-\setbeamertemplate{blocks}[rounded][shadow=true]
-\setbeamerfont{block title}{size={}}
-
-%%% Style des listes
-\setbeamertemplate{items}[triangle]
-
-%%% Type des continuations
-\setbeamertemplate{frametitle continuation}[from second][(suite)]
-
-%%% Des pieds de diapo simples
-\setbeamertemplate{footline}
-{
-  \leavevmode%
-  \hbox{%
-    \begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1ex]{footline}
-      \usebeamerfont{date in head/foot}
-      \hspace*{1.25ex}
-      \inserttitle{} \hspace*{3ex} \emph{\textmd{\insertsection}}
-      \hfill
-      \insertframenumber{} / \inserttotalframenumber
-      \hspace*{1.25ex}
-      \llap{\raisebox{2em}{\insertlogo}\hspace{.75ex}}
-    \end{beamercolorbox}}%
-  \vskip0pt%
-}
-\setbeamertemplate{navigation symbols}{} % pas de navigation affichée
-\setbeamertemplate{sidebar right}{}      % pas de logo
-
-%% D'autres paramètres Beamer en vrac
-\setbeamercovered{dynamic}      % on découvre lentement les trucs cachés
-\setbeamersize{text margin left=1em,text margin right=1em}
-# end beamerthemelille1.sty
-
-##############################################################################
-
-# begin-lille1 logo-univ-lille1.pdf base64 --decode
+# begin-lille1-cgir logo-univ-lille1.pdf base64 --decode
 JVBERi0xLjUKJbXtrvsKMyAwIG9iago8PCAvTGVuZ3RoIDQgMCBSCiAgIC9GaWx0ZXIgL0ZsYXRl
 RGVjb2RlCj4+CnN0cmVhbQp4nCvkClQo5CrkMlQwAEIQqWugZ2lgYmlpqZCcy6WfaKCQXqygX2Gq
 4JLPFUikYjNSFJuTotiCFMWWUMVcAAwJMWUKZW5kc3RyZWFtCmVuZG9iago0IDAgb2JqCiAgIDY2
@@ -536,9 +419,134 @@ Ugo+PgpzdGFydHhyZWYKOTQ0OQolJUVPRgo=
 
 ##############################################################################
 
-# begin-all beamer-pandoc.tex cat
-%-*-latex-*-
-\documentclass[10pt,t]{beamer}
+# begin-cgir logo-cgir.pdf base64 --decode
+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
+anEMJEI6hkWnGNHOQ15TwMs0Okj4I4KAMfkl4KXOoibRLP05Dso8fgwo93V+2tuhQSQR97CkZh9O
+ij2S+9Trb/XTtz4XpGuoHfJgqPC4lAgyQaK08eu7R5Y7C7+KIOGfBcMvMY28VWkfD5I4o8FQ/cTA
+jPSxuu/qzBoF1Vos/pqGQhqw1Cj8YgMW4gcSilNRkLyKNlheGltIztjDnEZSpbQSgYGo04T5RPTP
+ZOCxMfiV43uQq27+jHukQvbvGO7ol0fl1//gNGRK/v0/qimLbSj6mgN7Vuh2RpnEoWE38RMc0gQh
+q4URKCbNybaI1cHFr32LVf1+uqUJ/6g76d9D14mCYadjJrnUnCnubiGbulJG5Z0cEPkG+xov6To7
+VdKVJIwJrNRYvOEU8Ota22nWI8WOq4d5fA5bEgC9lqA2yxXWvzz8r1FA0GhZHgc0JSLnt8Nrsj+Z
+/259HQlWdoLJDkyyblap7KleCbhVsJ262br1tn+XHcuQE26Vb6hYeDGp8RStaFgGfWINsg01f4y6
++jsfiM4A293DxvsngSn9tNV61V7tVhPV5fZ/cfVtj3n8rv1xCYbOM/lz0lLkRjQ3z69IBFSZPop+
+ubi3a7OIVlIRU+U8fTjoo5e1wMRk/2e/Gs1KG1HnRrmmmV6/We7n+q/r/wFwUnB8CmVuZHN0cmVh
+bQplbmRvYmoKNCAwIG9iagogICA1OTAyCmVuZG9iagoyIDAgb2JqCjw8CiAgIC9FeHRHU3RhdGUg
+PDwKICAgICAgL2EwIDw8IC9DQSAxIC9jYSAxID4+CiAgID4+Cj4+CmVuZG9iago1IDAgb2JqCjw8
+IC9UeXBlIC9QYWdlCiAgIC9QYXJlbnQgMSAwIFIKICAgL01lZGlhQm94IFsgMCAwIDgwMCAxODUu
+Nzk2ODkgXQogICAvQ29udGVudHMgMyAwIFIKICAgL0dyb3VwIDw8CiAgICAgIC9UeXBlIC9Hcm91
+cAogICAgICAvUyAvVHJhbnNwYXJlbmN5CiAgICAgIC9JIHRydWUKICAgICAgL0NTIC9EZXZpY2VS
+R0IKICAgPj4KICAgL1Jlc291cmNlcyAyIDAgUgo+PgplbmRvYmoKMSAwIG9iago8PCAvVHlwZSAv
+UGFnZXMKICAgL0tpZHMgWyA1IDAgUiBdCiAgIC9Db3VudCAxCj4+CmVuZG9iago2IDAgb2JqCjw8
+IC9DcmVhdG9yIChjYWlybyAxLjEzLjEgKGh0dHA6Ly9jYWlyb2dyYXBoaWNzLm9yZykpCiAgIC9Q
+cm9kdWNlciAoY2Fpcm8gMS4xMy4xIChodHRwOi8vY2Fpcm9ncmFwaGljcy5vcmcpKQo+PgplbmRv
+YmoKNyAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwogICAvUGFnZXMgMSAwIFIKPj4KZW5kb2JqCnhy
+ZWYKMCA4CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwNjMwOSAwMDAwMCBuIAowMDAwMDA2MDE3
+IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwNTk5NCAwMDAwMCBuIAowMDAwMDA2
+MDg5IDAwMDAwIG4gCjAwMDAwMDYzNzQgMDAwMDAgbiAKMDAwMDAwNjUwMSAwMDAwMCBuIAp0cmFp
+bGVyCjw8IC9TaXplIDgKICAgL1Jvb3QgNyAwIFIKICAgL0luZm8gNiAwIFIKPj4Kc3RhcnR4cmVm
+CjY1NTMKJSVFT0YK
+# end logo-cgir.pdf
+
+##############################################################################
+
+# begin-all latex-pandoc.tex cat
+% -*-latex-*-
+\documentclass[10pt,twoside,openright]{report}
 
 % Paquets LaTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -555,7 +563,7 @@ Ugo+PgpzdGFydHhyZWYKOTQ0OQolJUVPRgo=
 \usepackage{bbm}                % pour les mathbbm
 
 %% Plein de symboles
-\usepackage{amssymb}            % Les symboles mathématiques de l'AMS
+\usepackage{amssymb,amsmath}    % Les symboles mathématiques de l'AMS
 \usepackage{latexsym}           % Quelques symboles manquants dans LaTeX 2e
 \usepackage{marvosym}           % Quelques symboles en vrac par Martin Vogel
 \usepackage{wasysym}            % Quelques symboles en vrac par Roland Waldi
@@ -565,16 +573,18 @@ Ugo+PgpzdGFydHhyZWYKOTQ0OQolJUVPRgo=
 \usepackage[official,right]{eurosym} % L'euro
 
 %% Mise en page
-\usepackage{pgfpages}           % pour les présentations en double-écran
+\usepackage{geometry}
 
 %% Quelques paquets utiles
 \usepackage{array}              % pour faciliter les styles de tableaux
-\usepackage{relsize}            % pour faciliter le changement de taille des polices
+\usepackage{relsize}            % pour le changement de taille des polices
 \usepackage[normalem]{ulem}     % pour avoir des soulignements funky
 \usepackage{tikz}               % pour les dessins portables
 \usepackage{fixltx2e}           % provides \textsubscript
 \usepackage{graphicx,grffile}   % pour les images
+\usepackage{fancyvrb}
 \usepackage{listings}           % pour les programmes
+\usepackage{hyperref}           % le plus tard possible d'après la doc
 
 % Configuration pandoc %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -595,15 +605,39 @@ $endif$
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
+%% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
 %% Prevent overfull lines
 \setlength{\emergencystretch}{3em}
 
-% Paramétrages Beamer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Allow subtitle
+$if(subtitle)$
+\providecommand{\subtitle}{$subtitle$}
+$endif$
 
-$if(theme)$\usetheme{$theme$}$endif$
+%% Enable titlepage illustration
+$if(titleimg)$
+\providecommand{\titleimg}{$titleimg$}
+$endif$
 
 % Configuration document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\frenchbsetup{%
+  ItemLabels=\textendash,%
+  og=«,%
+  fg=»}
+\geometry{%
+  a4paper,
+  top=1cm,bottom=1.5cm,
+  left=1.5cm,right=1cm}
 \hypersetup{%
   $if(title-meta)$
   pdftitle={$title-meta$},
@@ -619,6 +653,8 @@ $if(theme)$\usetheme{$theme$}$endif$
   urlcolor=blue,
   linkcolor=,
   pdfstartview=Fit}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
 
 % Méta-données du document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -637,16 +673,73 @@ $endif$
 
 \begin{document}
 
-\begin{frame}[plain]
-  \titlepage
-\end{frame}
+\input{titlepage}
 
-\begin{frame}
-  \frametitle{Plan}
-  \tableofcontents % il faut compiler deux fois pour mettre à jour la TDM
-\end{frame}
+\tableofcontents
 
 $body$
 
 \end{document}
-# end beamer.pandoc
+# end latex-pandoc
+
+##############################################################################
+
+# begin-lille1 titlepage.tex cat
+\begin{titlepage}
+  \makeatletter
+  \null\vfil
+  \vskip 60\p@
+  \begin{center}%
+    {\larger[4]\bfseries \@title \par}%
+    \vskip 5em%
+    {\larger[3]%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}%
+      \par%
+    }%    
+    \vskip 5em%
+    {\larger[2] \@date \par}%
+    \vfill
+    {\ifx\titleimg\undefined\else
+     \includegraphics[width=.75\textwidth]{\titleimg}\fi}
+  \end{center}\par
+  \vfill
+  \centerline{\includegraphics[width=3cm]{logo-univ-lille1}}
+  \vskip 60\p@
+  \makeatother
+\end{titlepage}
+# end titlepage.tex
+
+##############################################################################
+
+# begin-cgir titlepage.tex cat
+\begin{titlepage}
+  \makeatletter
+  \null\vfil
+  \vskip 60\p@
+  \begin{center}%
+    {\larger[4]\bfseries \@title \par}%
+    \vskip 5em%
+    {\larger[3]%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}%
+      \par%
+    }%    
+    \vskip 5em%
+    {\larger[2] \@date \par}%
+    \vfill
+    {\ifx\titleimg\undefined\else
+     \includegraphics[width=.75\textwidth]{\titleimg}\fi}
+  \end{center}\par
+  \vfill
+  \null\hspace{2em}%
+  \includegraphics[width=3cm]{logo-univ-lille1}%
+  \hfill%
+  \includegraphics[width=5cm]{logo-cgir}%
+  \hspace{2em}\null
+  \vskip 60\p@
+  \makeatother
+\end{titlepage}
+# end titlepage.tex
