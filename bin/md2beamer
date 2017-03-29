@@ -123,13 +123,14 @@ check ()
 }
 
 # extrait un fichier embarqué dans le script
-# args: dstdir name command
+# args: dstdir theme name command
 extract-file ()
 {
     d=$1
-    f=$2
-    shift 2
-    _sed -n '/^# begin-([^ ]+) '$f' .*$/,/^# end '$f'$/ p' $cmd \
+    t=$2
+    f=$3
+    shift 3
+    _sed -n '/^# begin-(([^ ]+-)*'$t'(-[^ ]+)*|all) '$f' .*$/,/^# end '$f'$/ p' $cmd \
         | sed '1d ; $d' \
         | $* >$d/$f
 }
