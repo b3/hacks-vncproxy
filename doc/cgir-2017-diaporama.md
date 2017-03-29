@@ -1,5 +1,7 @@
 % Administration à distance à travers un proxy HTTP/HTTPS
+
 % Fatemeh Zohari ; Florian Legrand ; Jean Canivez
+
 % 30 Mars 2017
 
 
@@ -41,8 +43,6 @@
 - Serveur Windows : TightVNC
 
 
-
-
 # SSH au dessus du proxy HTTP/HTTPS
 
 ### CORKSCREW
@@ -50,13 +50,8 @@
 - Introduction
 - Avantage
 - Désavantage
- 
 - Installation de corkscrew
-
-- Configuration de corkscrew
-- ~/.ssh/config
-- ssh -XC -i $key/id_rsa  -p 443 $server -o "ProxyCommand $HOME/src/bin/corkscrew $proxy $port %h %p"						
-
+- Configuration de corkscrew				
 - Script
 
 # SSH au dessus du proxy HTTP/HTTPS: LINUX vers LINUX
@@ -64,8 +59,7 @@
 ### LINUX vers LINUX
 
 - Installation corkscrew
-- ssh -i ~/.ssh/id_rsa -p 443 -o "ProxyCommand  /user/bin/corkscrew-2.0  cache.univ-lille1.fr 3128 %h %p"   cgir@test.boulgour.com
-
+- Configuration
 - Script(./corkscrew)
 
 # SSH au dessus du proxy HTTP/HTTPS: WINDOWS vers LINUX
@@ -74,10 +68,15 @@
 
 - Installation Cygwin
 - Installation Corkscrew
-- ssh -i ~/.ssh/id_rsa -p 443 -o "ProxyCommand /tmp/corkscrew-2.0/corkscrew.exe cache.univ-lille1.fr 3128 %h %p" cgir@test.boulgour.com
+- Configuration
 - Script
 
+
 # Administration à distance à travers un proxy HTTP/HTTPS
+
+![](img/vnc-ssh.png)
+
+
 ![](img/conclution.png)
 
 
@@ -89,7 +88,5 @@
 ###
 
 -Prendre le contrôle d'un pc à distance situé derrière un proxy
-
--Travail d'équipe
 
 -Découverte de nouveaux outils (Corkscrew, Gygwin, ...)

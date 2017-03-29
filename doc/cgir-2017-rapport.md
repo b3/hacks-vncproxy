@@ -162,21 +162,24 @@ Corkscrew est un simple outil pour faire un tunnel TCP à travers un proxy HTTP.
 
 Corkscrew va s’installer sur notre machine cliente.Il'y a deux maniére pour installer corkscrew:
 
->1- Si nous sommes sur Debian c’est toujours la même mélodie :
+1. Si nous sommes sur Debian c’est toujours la même mélodie :
 
->```shirin@debian:~$ sudo apt-get install corkscrew```
+```
+shirin@debian:~$ sudo apt-get install corkscrew
+```
 
->2- Pour le construire
+2. Pour le construire
 
-> * nous devons le télécharer et décompresser:
+  * nous devons le télécharer et décompresser:
 
-> ```wget http://agroman.net/corkscrew/corkscrew-2.0.tar.gz```
-	
->    ```tar xf corkscrew-2.0.tar.gz```
+```
+wget http://agroman.net/corkscrew/corkscrew-2.0.tar.gz
+tar xf corkscrew-2.0.tar.gz
+```
 
-> * puis, dans le répertoire de corkscrew, tapez ```./configure```
-> * puis ```make```
-> * Pour l'installer dans le répertoire du corkscrew, tapez ```make install```
+  * puis, dans le répertoire de corkscrew, tapez ```./configure```
+  * puis ```make```
+  * Pour l'installer dans le répertoire du corkscrew, tapez ```make install```
 
 Vous devriez trouver corkscrew dans votre gestionnaire de paquets habituels peu importe votre distribution, il existe même sur Mac port c’est vous dire.
 
@@ -619,28 +622,28 @@ Et c'est terminé !
 Pour finaliser notre projet nous avons faire les étapes suivants:
 
 ```
-> #### Sur Serveur (controlé) Linux:
-* 1.Executer le script ```./corkscrew ```
+Serveur (controlé) Linux:
+ 1. Executer le script ```./corkscrew ```
 
-> #### Sur Client (controleur) Linux:
-* 2.Lancer le client vnc ```$ xvnc4viewer -listen```
+Client (controleur) Linux:
+ 2. Lancer le client vnc ```$ xvnc4viewer -listen```
 
-> #### Sur Serveur (controlé) linux:
-* 3.Lancé le server vnc ```$ x11vnc -connect localhost:5500```
+Serveur (controlé) linux:
+ 3. Lancé le server vnc ```$ x11vnc -connect localhost:5500```
 ```
 
 
 ```
-> #### Serveur (controlé) Windows:
-* 1.Executer le script dans Cygwin```./corkscrew ```
+Serveur (controlé) Windows:
+ 1. Executer le script dans Cygwin```./corkscrew ```
 
-> #### Client (controleur) Linux:
-* 2.Lancer le client vnc ```$ xvnc4viewer -listen```
+Client (controleur) Linux:
+ 2. Lancer le client vnc ```$ xvnc4viewer -listen```
 
-> #### Serveur (controlé) Windows:
-* 3.Clic droit sur l'icône en bas à droite dans la barre de tâches et de cliquer sur attach listening viewer
+Serveur (controlé) Windows:
+ 3. Clic droit sur l'icône en bas à droite dans la barre de tâches et de cliquer sur attach listening viewer
 
-* 4.Entrer l'adresse de la machine avec laquelle on veut partager la connexion ainsi que le port d'écoute
+ 4. Entrer l'adresse de la machine avec laquelle on veut partager la connexion ainsi que le port d'écoute
 ```
 
 # Conclusion
@@ -652,8 +655,10 @@ dans notre futur métier d'administrateur systèmes et réseaux.
 Ce projet nous a également permis de travailler en équipe tout en se partageant les tâches. Nous avons
 aussi appris à manipuler l'outils GIT. Celui-ci nous a permis de mettre en commun nos travaux et de voir
 l'avancement du projet.
-Nous tenons à remercier M.Beaufils pour son encadrement, ainsi que les administrateur de l'IUT pour le
-prêt de la machine Windows et leurs conseils.
+
+![](img/conclution.png)
+
+Nous tenons à remercier M.Beaufils pour son encadrement, ainsi que les administrateur de l'IUT pour le prêt de la machine Windows et leurs conseils.
 
 # Annexes
 
