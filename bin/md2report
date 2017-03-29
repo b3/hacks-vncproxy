@@ -153,7 +153,7 @@ list-themes ()
 
 ##############################################################################
 
-VERSION=0.1-20170329-1626
+VERSION=0.1-20170329-1643
 LATEX_ONLY=false
 DEBUG=false
 THEME=lille1
@@ -211,6 +211,7 @@ $LATEX_ONLY || cd $TMPDIR
 pandoc -s \
        -f markdown_github+yaml_metadata_block-implicit_figures+link_attributes \
        -t latex \
+	   --chapters \
        --template=$TMPDIR/latex-pandoc.tex \
        -V fontsize=10 \
        $SRC > $dsttex
