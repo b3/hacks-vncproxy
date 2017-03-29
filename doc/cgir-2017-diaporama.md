@@ -6,7 +6,7 @@
 # Introduction
 
 ## Objectif
-- prendre le contrôle la machine(réseau privé) dériére un proxy web à partir une machine(adresse publique)
+- Prendre le contrôle la machine(réseau privé) dériére un proxy web à partir une machine(adresse publique)
 - La machine à assister peut fonctionner sous Linux, Windows ou Mac.
 - Outils sous licence libre
 - Données circulent chiffrées
