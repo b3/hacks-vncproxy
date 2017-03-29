@@ -1,0 +1,743 @@
+#!/usr/bin/env bash
+# Convertit un fichier markdown en un rapport via LaTeX
+# Copyright (C) 2017 Bruno BEAUFILS
+#
+# usage: md2report [OPTIONS] SOURCE [FICHIERS-INCLUS...] 
+#
+# md2report est un wrapper autour de pandoc qui permet de convertir un fichier
+# au format Markdown en un rapport PDF via LaTeX. L'outil est essentiellement
+# prévu pour les projets et stages d'étudiants.
+#
+# SOURCE est le fichier au format Markdown source du rapport. Le fichier doit
+# avoir comme suffixe '.md'.
+#
+# Si le rapport inclus d'autres fichiers on doit les spécifier à la suite. On
+# peut, par exemple, spécifier des fichiers images, des modèles remplaçants
+# ceux utilisés par le script (modèle pandoc, etc.)  ou des répertoires
+# complets.
+#
+# Les formats d'images utilisables sont uniquement pdf (pour du vectoriel) et
+# png ou éventuellement jpg (pour du matriciel). Les extensions d'images
+# '.svg' dans SOURCE sont remplacés automatiquement en '.pdf'. Les images sont
+# alignées horizontalement en s'assurant qu'elles tiennent sur la largeur de
+# la diapositive.
+#
+# OPTIONS
+#
+#     -h, --help           affiche ce message d'aide
+#     -t, --theme THEME    utilise THEME pour la forme du rapport au lieu de
+#                          lille1. 'list' permet de lister les thèmes.
+#     -s, --slide-level N  spéficie le niveau de titre qui définit une diapo
+#                          au lieu du niveau 2
+#     -L, --latex          produit le source LaTeX plutôt que le résultat PDF
+#     -c, --check          vérifie la présence des outils nécessaires
+#     -l, --list-debian    liste les paquets Debian nécessaires
+#     -d, --debug          conserve le répertoire de travail (/tmp/md2report)
+#     -V, --version        affiche la version du script
+#
+# EXEMPLES
+#
+# Vérifier que les outils nécessaires sont disponibles sur la machine :
+#
+#     md2report -c
+#
+# Convertir le fichier rapport.md qui inclut l'image image.pdf
+#
+#     md2report rapport.md image.pdf
+#
+# Convertir le fichier rapport.md qui inclut des images du répertoire img
+#
+#     md2report rapport.md img/image1.pdf img/image2.png
+#
+# Convertir le fichier rapport.md qui inclut des images du répertoire img
+#
+#     md2report rapport.md img
+#
+# DEPENDANCES/LIMITATIONS
+#
+# Pour fonctionner md2report a besoin que 'pandoc' ainsi qu'une installation
+# TeX (avec 'pdflatex') soit accessible. Seule la distribution TeXLive
+# disponible pour Unix (sous le nom MacTeX pour Mac OS X) a été testée.
+#
+# [pandoc]: http://pandoc.org
+# [texlive]: http://tug.org/texlive
+# [mactex]: http://tug.org/mactex
+#
+# Avec les dépendances spécifiées, en l'état ce script ne peut pas fonctionner
+# complètement sous MacOS X car il utilise des options spécifiques aux
+# versions GNU des commandes UNIX classiques.
+
+# TODO: expliciter extensions markdown supportées
+# TODO: switch to shembed
+
+# DETAILS TECHNIQUES
+#
+# Les autres fichiers nécessaires (modèle pandoc, logos) sont embarqués en fin
+# de script (pour pouvoir diffuser le script et rien d'autre). L'embarquement
+# est fait entre deux lignes sous la forme :
+#
+# # begin-THEMES FILENAME COMMAND
+# ...
+# # end FILENAME
+#
+# THEMES correspond à une liste de thème pour lesquels le fichier est
+# nécessaire et doit donc être extrait avant la conversion. Dans cette liste
+# les thèmes sont séparés les uns des autres par un tiret (-). Si THEMES vaut
+# all le fichier est extrait pour tous les thèmes.
+#
+# COMMAND est la commande à utiliser pour reconstruire le fichier,
+# généralement c'est cat (quand le contenu est textuel et qu'il faut juste
+# l'extraire) ou base64 --decode (quand le contenu du fichier est binaire et
+# qu'on l'a embarqué en base64).
+
+# CONVENTIONS DE CODAGE
+#
+# Quand on ajoute/modifie quelque chose il faut penser à un fonctionnement
+# sous Linux **et** BSD (e.g. MacOS X). Il faut par exemple être
+# précautionneux avec les options de commandes Unix classiques qui sont
+# souvent différentes. Dans l'idéal il faudrait penser POSIX.
+
+# FreeBSD et GNU n'ont pas la même option pour activer les ERE dans sed
+# TODO: probleme si le sed disponible est strictement POSIX (aka ni GNU, ni FreeBSD)
+if sed v </dev/null >/dev/null 2>&1 ; then
+    _sed() { sed -r "$@" ; }    # GNU
+else
+    _sed() { sed -E "$@" ; }    # (FreeBSD)
+fi
+
+doc () { sed -n '2,/^$/ { s/^ *#// ; s/^ //g ; t ok ; d ; :ok ; p }' <$0 ; }
+die () { echo "${0##*/}: error: $*" 1>&2 ; exit 1 ; }
+log () { date "+%F %T ${0##*/} $*" | tee -a "$LOG" ; }
+abs () { echo $(cd $(dirname $1) ; pwd)/${1##*/} ; }
+mute () { 1>/dev/null 2>&1 $* ; }
+need () { die "$1 is unavailable" ; }
+
+# réussit si les outils nécessaires sont accessibles
+check ()
+{
+    mute which pandoc || need pandoc
+    mute which tar || need tar
+    mute which base64 || need base64 coreutils
+    mute which pdflatex || need pdflatex texlive-latex-base
+}
+
+# extrait un fichier embarqué dans le script
+# args: dstdir theme name command
+extract-file ()
+{
+    d=$1
+    t=$2
+    f=$3
+    shift 3
+    _sed -n '/^# begin-(([^ ]+-)*'$t'(-[^ ]+)*|all) '$f' .*$/,/^# end '$f'$/ p' $cmd \
+        | sed '1d ; $d' \
+        | $* >$d/$f
+}
+
+# liste les fichiers pour un thème donné (avec leur commande de décodage)
+# args: theme
+list-files ()
+{
+    grep '^# begin-' $cmd \
+        | grep -e "-$1[- ]" -e '# begin-all '\
+        | _sed -e 's/^# begin-[^ ]+ (.*)$/\1/'
+}
+
+# liste les thèmes qui embarque des fichiers dans le script
+list-themes ()
+{
+    grep '^# begin-' $cmd \
+        | _sed -e 's/^# begin-([^ ]+) .*$/\1/' \
+        | tr '-' '\n' | sort | uniq
+}
+
+##############################################################################
+
+VERSION=0.1
+LATEX_ONLY=false
+DEBUG=false
+THEME=lille1
+TMPDIR=/tmp/md2report
+SLIDELEVEL=2
+DESTDIR=$PWD
+
+cmd=$(abs $0)
+
+while [ ! -z "$1" ] ;
+do
+    case "$1" in
+        "-h"|"--help") doc && exit ;;
+        "-V"|"--version") echo $VERSION && exit ;;
+        "-c"|"--check") check && exit ;;
+        "-l"|"--list-debian")
+            egrep '\|\| need' $0 | _sed 's/^.* (.*)$/\1/'
+            exit
+            ;;
+        "-t"|"--theme")
+            shift
+            THEME=$1
+            [ "$1" = "list" ] && list-themes && exit 0
+            ;;
+        "-s"|"--slide-level")
+            shift
+            SLIDELEVEL=$1
+            ;;
+        "-L"|"--latex") LATEX_ONLY=true ;;
+        "-d"|"--debug") DEBUG=true ;;
+        *) break;;
+    esac
+    shift
+done
+
+check || die "needed tools missing"
+
+[ -z $1 ] && die "missing source file"
+SRC=$(abs $1)
+dsttex=$(basename $1 .md).tex
+dstpdf=$(basename $1 .md).pdf
+shift
+
+mkdir -p $TMPDIR
+
+list-files $THEME | while read f
+do
+    extract-file $TMPDIR $THEME $f
+done
+
+[ $# -ne 0 ] && { tar -cf - "$@" | tar -C $TMPDIR -xf - ; }
+
+$LATEX_ONLY || cd $TMPDIR
+
+pandoc -s \
+       -f markdown_github+yaml_metadata_block-implicit_figures+link_attributes \
+       -t latex \
+       --template=$TMPDIR/latex-pandoc.tex \
+       -V fontsize=10 \
+       $SRC > $dsttex
+
+ _sed -i \
+      -e '/\\begin\{document\}/,$ s!\\includegraphics(\[[^]]*\]|)\{([^}]*).svg\}!\\includegraphics\1{\2.pdf}!g' \
+      -e '/\\begin\{document\}/,$ s!(\\includegraphics(\[[^]]*\]|)\{[^}]*\})!\\centerline{\1}!g' \
+     $dsttex
+
+if ! $LATEX_ONLY ; then
+    trap "die $PWD/$dsttex: compilation failure" ERR
+    export TEXINPUTS=.//:
+    pdflatex -halt-on-error $dsttex 1>/dev/null 2>&1
+    pdflatex -halt-on-error $dsttex 1>/dev/null 2>&1
+
+    mv $dstpdf $DESTDIR
+fi
+
+$DEBUG || { cd .. ; rm -rf $TMPDIR ; }
+
+##############################################################################
+
+exit 0
+
+# begin-lille1-cgir logo-univ-lille1.pdf base64 --decode
+JVBERi0xLjUKJbXtrvsKMyAwIG9iago8PCAvTGVuZ3RoIDQgMCBSCiAgIC9GaWx0ZXIgL0ZsYXRl
+RGVjb2RlCj4+CnN0cmVhbQp4nCvkClQo5CrkMlQwAEIQqWugZ2lgYmlpqZCcy6WfaKCQXqygX2Gq
+4JLPFUikYjNSFJuTotiCFMWWUMVcAAwJMWUKZW5kc3RyZWFtCmVuZG9iago0IDAgb2JqCiAgIDY2
+CmVuZG9iagoyIDAgb2JqCjw8CiAgIC9FeHRHU3RhdGUgPDwKICAgICAgL2EwIDw8IC9DQSAxIC9j
+YSAxID4+CiAgID4+CiAgIC9YT2JqZWN0IDw8IC94NSA1IDAgUiAveDYgNiAwIFIgL3g3IDcgMCBS
+IC94OCA4IDAgUiAveDkgOSAwIFIgPj4KPj4KZW5kb2JqCjEwIDAgb2JqCjw8IC9UeXBlIC9QYWdl
+CiAgIC9QYXJlbnQgMSAwIFIKICAgL01lZGlhQm94IFsgMCAwIDU3NS4xMjI5MjUgMjIwLjA5NTAw
+MSBdCiAgIC9Db250ZW50cyAzIDAgUgogICAvR3JvdXAgPDwKICAgICAgL1R5cGUgL0dyb3VwCiAg
+ICAgIC9TIC9UcmFuc3BhcmVuY3kKICAgICAgL0kgdHJ1ZQogICAgICAvQ1MgL0RldmljZVJHQgog
+ICA+PgogICAvUmVzb3VyY2VzIDIgMCBSCj4+CmVuZG9iago1IDAgb2JqCjw8IC9MZW5ndGggMTIg
+MCBSCiAgIC9GaWx0ZXIgL0ZsYXRlRGVjb2RlCiAgIC9UeXBlIC9YT2JqZWN0CiAgIC9TdWJ0eXBl
+IC9Gb3JtCiAgIC9CQm94IFsgMjY1IDIgNTM1IDU2IF0KICAgL1Jlc291cmNlcyAxMSAwIFIKPj4K
+c3RyZWFtCnicbVlNsjSpDdzXKeoCrin+4Rg+gqPD38yiv4XH949wZkpAvW6v3pMoQEIpKaH/c9xX
+SC2WcuKfGEod+qfkcf795/nHv+7zz/8esQ0OnjlcMZ2/zyWna3RI7SrQ53LVUSCmq0Cd2xXq+Tpj
+HddIkPuVez8k15rPPK6ED6ZY7iu35t9LEa4eIpa7r97bWeLVMB5bvErLLh78vuXrjnu8XKlIjClD
+rFfNgYvR4JeMDffgdi2U8y1f7nicJV2hS+5X5XrwIicp6tW5YrnuWrXdqIHitKfaKMWX+RdSWh/U
+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
+o6+TzH6F81F/gu6630yJjf0WxTbFsTv7+sQ6u1bDuXjnzqjUW3rJlhLbHkZjKyJKpOaZpauLvPPT
+onoLRSiKD26juJGqh9+6rfCKW9TDeUt942aAOXy+RkqQL3B5PjtY35YtuIHPrk7LxQlsFH0rgBAw
+LgUBWPICzFQsvLqiiiJxNTnuvxfAplBNOuQN2Fqva7jaK4EgLscaI2Dv6pQLkZ+tUJjI0s7HXW7s
+gJDmqZiAAGhwtQq7iT7eDIu9GZbbHioW0S2hiJYsvrgUs8uuKR+KB9EFj9RPFl+KVaTKzbL3JS+a
+ywmtbaY/5Vn1phGf8oPmljgY0ZCVBPAMNwEitNjlFxIfb7huGFtsIoKvrQAFDXxrjlV3fEKWL2MG
+R5P49dAvLj6abtVwNQSU4RTt7sNrM1FABUFCTAcGqqQ8pxP1pghIBSiMynJKFqJpBDcAYz8ctLRG
+vxSlaU1WhOcoyGOR5T0uCY4yIK+pOHhQOXVN5muk1y6kqR55eLClyvigNhBu+xwirw1DV3iXDhQO
+e9uYw1UvEIlPAKc1OBqdrCmlLDvq5EAaZcsKbHs8EdAXtdqO7In6OAnXXc/mOJ7Ixw5eYe7hovEn
+e/HQdJ4X6H+2xQkmy0IZUtui3jzqO405ikiwzhS1AZfoH219rWEcj34CSUm0nZWSDv+AIKv4P4//
+AYJgl7cKZW5kc3RyZWFtCmVuZG9iagoxMiAwIG9iagogICAyNTYzCmVuZG9iagoxMSAwIG9iago8
+PAogICAvRXh0R1N0YXRlIDw8CiAgICAgIC9hMCA8PCAvQ0EgMSAvY2EgMSA+PgogICA+Pgo+Pgpl
+bmRvYmoKNiAwIG9iago8PCAvTGVuZ3RoIDE0IDAgUgogICAvRmlsdGVyIC9GbGF0ZURlY29kZQog
+ICAvVHlwZSAvWE9iamVjdAogICAvU3VidHlwZSAvRm9ybQogICAvQkJveCBbIDAgMCA1NzYgMjIx
+IF0KICAgL1Jlc291cmNlcyAxMyAwIFIKPj4Kc3RyZWFtCnicK+QKVCjkMlAwMjJUMDU3U9A1MjLQ
+MzQ1UyhKVQhXyOMq5NJPNFBIL1bQrzA0VXDJ5woEQgA1MQu1CmVuZHN0cmVhbQplbmRvYmoKMTQg
+MCBvYmoKICAgNTkKZW5kb2JqCjEzIDAgb2JqCjw8CiAgIC9FeHRHU3RhdGUgPDwKICAgICAgL2Ew
+IDw8IC9DQSAxIC9jYSAxID4+CiAgID4+CiAgIC9YT2JqZWN0IDw8IC94MTUgMTUgMCBSID4+Cj4+
+CmVuZG9iago3IDAgb2JqCjw8IC9MZW5ndGggMTcgMCBSCiAgIC9GaWx0ZXIgL0ZsYXRlRGVjb2Rl
+CiAgIC9UeXBlIC9YT2JqZWN0CiAgIC9TdWJ0eXBlIC9Gb3JtCiAgIC9CQm94IFsgNTEgNDggNTM0
+IDIxOSBdCiAgIC9SZXNvdXJjZXMgMTYgMCBSCj4+CnN0cmVhbQp4nG1YXY7mNg589yl8gVVEifo7
+Ro6w+LBJHnoeNnt/YKuKtuyeCYKgm2yJ4k+xSM9/Dzv5399/nr/9O59//u9YJc1y+kx12PnjbJZG
+rmcfyco6v27Zxkh1TSji/M9y3D8g/3GY92R5nXOmhj/9OC23tHydI6fSeOdWXK9CcV3pPfX1Uhy3
+EdrNyeoorZ34pVjrS7802EE0tdUEA9ZbysPxaPWVstHTqlCq19Qb5Dmkr15Sq+ss2ZJ7Oz9nrQ4T
+fmzV163amlo75AmjLWREoPS0KT2MtJF83gompCLsPPtzZxR6uk1+F2Ghw1H89vKi01Vkd/uOR2z0
+J7bvwX+QrFZaal7PYvBwNlW2pznW1nw9mv1SM0vtrTgujS1Hmf116R80CLSV+tYglNnH2UpOtSAb
+d55amWnV+cpbq1X+3pqvR4OophVpcvLSbw2T20pHMGsfusM2ALihcFselnIzPnRrHv/joeNX1Tsz
+dz5/1ex8/nEUgK6z/APxsZ0eRUYmcNg99enyt/ezAE9rlVv8nKWsVDNLfR0onmotz/0t64HPVsgL
+Z5bQGkDgvDXHS8VbPv2bBtBixW3AL6WtlAGrFs2CAvqoegfRtsYSLoRrcB0ZzYgEWBztiSREXHAL
+DFx/R0N77rpuuZxHaWiLCi7qeArgxQ2U3h8TX1vxiu1K5y+a484Iq1BzjqQvGBqDZVhTjVLwF4QO
+GcCciDOj+QbsobE64r9lODMried4joyVZg4TyEwBAToRDMvTdQMlqvzLdeFra15kQCu5vFB+KybK
+6G/FQnoJgFmESYPHq9Xb02Mr8DAouJHp7iOrp2ovE7d8vfF5NC+Wyp4Wgbk925oJJJb21iz0YQd1
+ZTyIn+wbdsKV92MnnkTkatrn9R/n1lz+OUi2lLr997qkfyJ0z2n0/gTtIG+1AeQGb13kzivIFjLO
+K43jApqGoQMRPDGqPFsZlhzMjdmhclbBjzfmjA6vQBLfmL7LeXv1QIR+M3nPCUsljxshDo6btb8Q
+4ugqtsIGyKV4lWHnZpfh5/wJ4Oje+eLpSar4F3JAtP39n/eJi5zixBTIdcCROXf7ZsK/29hHXjb8
+m5GKZnZDEyAOR1leRvznIxVG1vgnI7NHl0xe0+imBhVgyKQGyt5GIJEjE3Iv/HtPTfOOGpBSTEgH
+8ionJdkF+0OZS7J3yksyr8ChMgQZIKniR/YhLJeMYVDRI8ZHQsEbi525j5yei3JMEPaBgudwl7g2
+JzlTs5ZwC0gQIlh8eANe5EvMI5wu/boAWClSWOALHFXIDDuQDmgpMpBCXVoW4AvftokOAZwrLPOo
+gUXWlaqq2Qx9bleqlG5pNB7+OiragrxI6nUsVmhSgHiZb42j1xUsgWlo2txjz4FLU+DOgLkx1g6O
+RQxuWS6Q4Fl5txqudKTP+3WFJ63DiHFxoNUYjyOmDTNkjA+bIVYguaG5xXm/4l3ju9IUdDiTtGTU
+NZAYGp49tuITta7rOQIoVHYqXuX6yRTJcw7HdeVsoR5UdBviS6r6ClXh3AFiBS0tZWvJEbIaxIla
+MRKOHG7OTX4vjqRDheBa7Ny0UEhYUbaKFhj2QNF5YzeuAH0vkhU3Kk79QYX2TEY3xYFWYltd0Tes
+SMysIeh7HmImeKv2vQBr1wacu1Awh23KUlPk8iLBCvAH6d0nshZ2WkBvHpHcbMGKcoup4y7GZ4FA
+yI7yDxEl+6bO2EkMjxEevGGxnbFK9RrEbDNOI8o5z2ht4apiFWCDMlWuE4h3RR9V7o1bQVNyaSuI
+jCabfTXBzmhhVrGkYRMnGV+MYyv2IQ4alj+GfTTMzy3FWVj61KRj4Ka9BArEEQo2wK2wHEQcGjUJ
+2QWXJC9gkB9R3NGoELWhd9rUEgmN+DEPxU+ZVbSsq5C5ZMK1fC2bsbyQYS3mahmxH5l57EvIjyb9
+JXM/CmTsE+TqxXwAhmzhItJGSo1sGCtV50A1y/KTm4y4Dl5wr2JDXT5De8R5PKxAmXQ+QfpFajoS
+Tg+4CxhJMivugQywJbLWBcjGPeVgele7Uvek/wPioxMgDdSKGxQXRRgdOlK0OsVMMu4EdHJ5dFB2
+9SxXKdDO4scD0z8kaxPJSzOLNxa/WdSLrhs1yMTiJNe3MinTFX5+ksPJcbZU2MgE9wSOWXPthMNw
+oxR1vKrjj8xMNE6z43UkgEsTak/U23Qli2YIGpABC2CBxQI+XYIEu5JrDtiSn/yGj7vos9K5Ibkw
+wCwVrvLkE5ScvFowCbiNMRdXtqDJfmVLqz26h8UU3h9xsS914VbEdOYLDf2JfLBL6GOZKPDUnAzk
+kxzRvsZPaFFxO4e+ybVZt1v6RBrh1vVXjNzBwQ/yyIWLNngLizdNLX2eABqABFDH6Fk1fniCrmdu
+AQPcElv7dTqT/+bSGvElg/w8BuLoYtG3fGco+mcIPI9P5BM/VoCZQ79TJjjwPzfqgzK/uhiL3gvx
+c3Vsff6e9S8EhHeuygu9hdNk3M95hMak0T/0iCRyHKmiIiYPv90EDw/wg+DN4f3um0Pk9vvxf3oq
+kcoKZW5kc3RyZWFtCmVuZG9iagoxNyAwIG9iagogICAxOTAyCmVuZG9iagoxNiAwIG9iago8PAog
+ICAvRXh0R1N0YXRlIDw8CiAgICAgIC9hMCA8PCAvQ0EgMSAvY2EgMSA+PgogICA+Pgo+PgplbmRv
+YmoKOCAwIG9iago8PCAvTGVuZ3RoIDE5IDAgUgogICAvRmlsdGVyIC9GbGF0ZURlY29kZQogICAv
+VHlwZSAvWE9iamVjdAogICAvU3VidHlwZSAvRm9ybQogICAvQkJveCBbIDAgMCA1NzYgMjIxIF0K
+ICAgL1Jlc291cmNlcyAxOCAwIFIKPj4Kc3RyZWFtCnicK+QKVCjkMlAwMjJUMDU3U9A1MjLQMzQ1
+UyhKVQhXyOMq5NJPNFBIL1bQrzAyUHDJ5woEQgA1DguxCmVuZHN0cmVhbQplbmRvYmoKMTkgMCBv
+YmoKICAgNTkKZW5kb2JqCjE4IDAgb2JqCjw8CiAgIC9FeHRHU3RhdGUgPDwKICAgICAgL2EwIDw8
+IC9DQSAxIC9jYSAxID4+CiAgID4+CiAgIC9YT2JqZWN0IDw8IC94MjAgMjAgMCBSID4+Cj4+CmVu
+ZG9iago5IDAgb2JqCjw8IC9MZW5ndGggMjIgMCBSCiAgIC9GaWx0ZXIgL0ZsYXRlRGVjb2RlCiAg
+IC9UeXBlIC9YT2JqZWN0CiAgIC9TdWJ0eXBlIC9Gb3JtCiAgIC9CQm94IFsgMjE1IDc3IDU2OCAy
+MjEgXQogICAvUmVzb3VyY2VzIDIxIDAgUgo+PgpzdHJlYW0KeJxtVUmSFDEMvNcr/AJjLbasZ/AE
+oiIYDj0H4P8RpFTl8jBw6la2LWdKKfXPo1US494LvjD14fmlq5dfb+XLt1befh9qXEl7oSl1NC7v
+RUev0hmIVnIvLyCt2riQIVK0e9U2EA/c6Ss+AHilOcu5jzhX7bgyuDbBM67VLGKrzPLEuGFU2W0h
+B4BeiQKQ6qSIrU5FSLV7XABjtvjd8GjQNK88vXAD3YY3TIL2AQCP28xHBXxXHDQnENonOuVn5OQx
+djznler8AFGlFN+rQRjYKeEJqROVslGNL1kXmUBQ+6SpdQ5DtSDQIEDxkyIh6E6nHbbqgzLFBYwB
+/VEHrkIo7dDq6OURslqnBziz2rNtJGQSO+KOJ4IzGqnxu9feshA6q3dUnSDAdARPHGqK+uLyMM6W
+uuPdDqXw0vPsHZ/ZIeG5ELQQhvFoEfhwdGTF6LW0q4kL8XxMZ6tMYDr5bnra83j8eZbvByujG6PA
+CROFeC8JdC3RJVxm8Trh4BlGjhBqh67wLMyGXOC3DjByw+ne0qNPCBU88vwFUJM08ysRm+h6G7VN
+OD8A1A8ASjAEMZrc4oBnsyIJDAAWRFw7lDJ7kiXCmIEsC5LT8cS4IfPvE6kyEygmdlUhnnTE54VE
+MVtOzHEBk4r3rMenup3lx1NKYtS9z6wlvjmUMHoE27FYznTE0angKdOeOJS1MO6xj1CPhQOm4IEl
+sGKHgXLWF4CedtOnvjHgBkNHwxROu+OrEuHTG2DFCsA+inkXMFSFu6zEQFoWDiOqcp8+ol0XQFFQ
+rJjXrt2/yF2IF3wmQmkI+KJjmN/LAvY1YQzjsP8gYSYaGzhCbWxP4V4dtG3m/hCJNUsrPAt2L+y6
+4teK4dXeFDFoYW8QbUQE48W2gMVyYofh2CcVMUCCPR0rHkZoI3b+Aj7IwCCOaPs/SOQR2kAKi7ZI
+/GGIPcKw+k35gzAMVDhqK7sB8J6s5QgErZQFRIzHXBewaE7L/51PMkKZwnIT/3iPsgVsHdpgPv8f
+8ii7gUeZtpn78mauhMr2LUzh+5ivR9gClg5sQsJjMrcyjRFoz5FF81b2SUYo61i3udwwN+8FGwQm
+wugQ5Uy9NtIwPEgMZN1AMhXdyJFJwuFfjz9AmJalCmVuZHN0cmVhbQplbmRvYmoKMjIgMCBvYmoK
+ICAgODQ5CmVuZG9iagoyMSAwIG9iago8PAogICAvRXh0R1N0YXRlIDw8CiAgICAgIC9hMCA8PCAv
+Q0EgMSAvY2EgMSA+PgogICA+Pgo+PgplbmRvYmoKMTUgMCBvYmoKPDwgL0xlbmd0aCAyNCAwIFIK
+ICAgL0ZpbHRlciAvRmxhdGVEZWNvZGUKICAgL1R5cGUgL1hPYmplY3QKICAgL1N1YnR5cGUgL0Zv
+cm0KICAgL0JCb3ggWyAwIDAgMjQyIDIxOSBdCiAgIC9SZXNvdXJjZXMgMjMgMCBSCj4+CnN0cmVh
+bQp4nF2PS24EMQhE9z5FnYCYn4Fj5AijSJlNzyLJ/aXgmU4WvXJVgeHxNSaxhrijhbCvegq3wvcd
+b7eJ+88QZWJjmJEW4wERpW6GCYkJjg6YfCa8n7AdaPeKwZ1MtzemUBvXAEpc9fzw2nH1584Dn40a
+0zOlCWekKVsr24ltWE6nzIBwUjTVA/NfH61rktpT6aJcCus5e1iaoYRinWbgAzwXVdpZZZkkFQ1n
+CVYhXokk9dqt24ds39UD7K/TOWhNGTs5yf5uu5Lu497HL1+JToUKZW5kc3RyZWFtCmVuZG9iagoy
+NCAwIG9iagogICAyMDcKZW5kb2JqCjIzIDAgb2JqCjw8CiAgIC9FeHRHU3RhdGUgPDwKICAgICAg
+L2EwIDw8IC9DQSAxIC9jYSAxID4+CiAgID4+Cj4+CmVuZG9iagoyMCAwIG9iago8PCAvTGVuZ3Ro
+IDI2IDAgUgogICAvRmlsdGVyIC9GbGF0ZURlY29kZQogICAvVHlwZSAvWE9iamVjdAogICAvU3Vi
+dHlwZSAvRm9ybQogICAvQkJveCBbIDQyNiA3NyA1NzYgMjAzIF0KICAgL1Jlc291cmNlcyAyNSAw
+IFIKPj4Kc3RyZWFtCnicXVZLsms3CJyfVZwVKAKBgGVkCa9clZfBfYMk+69KNzp2bmVkgyU+3Q3y
+X9ccskLdb3xR8V39xa3uv3/ev/2Y989/Lls+tNZdNbbE/etux97Hse6vj0PmGsv18axZ8Fhfajvk
+gsPHxhE6fDnsPTz3/WrPLnpiWFrbZbQT6RliIwRDFkIjFK/E2DwiOtZCUJujtsC2gW5g+5hM8ti4
+YXGCvk+4jIhAXbLGZlZfwzVgyxBLXoGnxOCZXam5DZ/ZdaDD/hkXu+xl13ODMLBXU+0ky7Lh2Qud
+WI7JHFOHze7dkJWtzRHA0VYCnLqIcPlB7xsDr/vPi1Xk9LtiuChJcQS14BlSYXsOE+aUJsK29EES
+ot59bYC22TopiLZjdVt2zMZ1lvVhGVPAsJA+ggASnDgGLhG2jcqVOOI6KDgopKICFVSCI1YjElcU
+QYkjyWHIxyYKShW+PRf6RrDaHcJTm2+yJgoqTl3LwLh3WmrR1gLjVEA2fbaQPBbr2kOtsyhAJTKQ
+wDLUpTlCVzNehSQKiag2EA9S8KDRBsoKTZqiW5Gjd/2YgJ4Nv/5zaFPCDBsc5B5SgpoAPNhOsL+u
+t/KhiyjU7K1iqCM4BjBwSeuxXo0ikzy/ulK+d1BQiGWOMavsSFVNwuEnZ3dP2nKvO6XFQ8qpq6Qm
+7DkO2K47q5n46oiOiAmdbW3xn06gz05vU+/EpB4d+zzpoNeUFno6AIM9p3UzHOXHfJ2B9Y+j+XXm
+irkaFhYLFDeSHJzS/WoPMDlrJjPasXoTEbsJx+oPFkAZwKx5qv82NNfr/uNybgRqDJgxza/748nV
+AvmCB/iiXwFQJJI2hhe29/6hjaGDyghMsDO6IAN4QBQYor2DNo4mQwBhlCJAmjZuADusyFvQzAJm
+jvnZRRvsAA4nlfExcQEj3iHfBzYXEzYRut2hsDcFjKqKu0z6yj4LszBAkbABOPhiFbNtCtdP1bqf
+G/yFrRqWLpPMsAZngysWEc7fUXV594E9zblO/mKwhXImvvVg1Vo9gHtvM9+OhwgziM+E2kDCXtgj
+3h4NNndWgCA/p9Sh5N6hj/06eCUW8OcIIEYsQY/EkYm5NCSUu/ZQxIVOB9fq4ZlbpD2KbuGCxGsh
+SqweKfab4W1neSPY7xgGsrsPdM01Gmd7OO9xogQzR+1DHhhFbS3puQHxs05qByNGmxuUnGDa+wID
+cpmkXn1jjWCIeuQXZ4MKdB3ABM849xRsrvL1sOhY14rXgC8O8mACIFjFE9TEU1xYEG+bcBpn99sJ
+7AoEZwhKvNE1huSzeOqyOC94nVFybPjgM1LZ+nM7QpXarTreANB8GSHhtVCXCSs+kuWr6phnvjc9
+Jr2+sXdG2oGLfxNom8mZVgz1xw4uyuu5cTza/waYhJoHJtIpiD9M7cf66AIP4y2QGP4dUVj4joHY
+xankSqu3o7HV5u3toZZ7DPkgC7HO3uAdLvPRCLRNpc4Gwo8kBRqPloh/tP00DUaT/33wKf2Xi1GX
+HnU7dyIp7vngapb7/xPFVff79S/DVet8CmVuZHN0cmVhbQplbmRvYmoKMjYgMCBvYmoKICAgMTE1
+MQplbmRvYmoKMjUgMCBvYmoKPDwKICAgL0V4dEdTdGF0ZSA8PAogICAgICAvYTAgPDwgL0NBIDEg
+L2NhIDEgPj4KICAgPj4KPj4KZW5kb2JqCjEgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzCiAgIC9LaWRz
+IFsgMTAgMCBSIF0KICAgL0NvdW50IDEKPj4KZW5kb2JqCjI3IDAgb2JqCjw8IC9DcmVhdG9yIChj
+YWlybyAxLjEzLjEgKGh0dHA6Ly9jYWlyb2dyYXBoaWNzLm9yZykpCiAgIC9Qcm9kdWNlciAoY2Fp
+cm8gMS4xMy4xIChodHRwOi8vY2Fpcm9ncmFwaGljcy5vcmcpKQo+PgplbmRvYmoKMjggMCBvYmoK
+PDwgL1R5cGUgL0NhdGFsb2cKICAgL1BhZ2VzIDEgMCBSCj4+CmVuZG9iagp4cmVmCjAgMjkKMDAw
+MDAwMDAwMCA2NTUzNSBmIAowMDAwMDA5MjAyIDAwMDAwIG4gCjAwMDAwMDAxNzkgMDAwMDAgbiAK
+MDAwMDAwMDAxNSAwMDAwMCBuIAowMDAwMDAwMTU4IDAwMDAwIG4gCjAwMDAwMDA1NDggMDAwMDAg
+biAKMDAwMDAwMzM2OSAwMDAwMCBuIAowMDAwMDAzNzEzIDAwMDAwIG4gCjAwMDAwMDU4NzQgMDAw
+MDAgbiAKMDAwMDAwNjIxOCAwMDAwMCBuIAowMDAwMDAwMzE5IDAwMDAwIG4gCjAwMDAwMDMyOTYg
+MDAwMDAgbiAKMDAwMDAwMzI3MiAwMDAwMCBuIAowMDAwMDAzNjEwIDAwMDAwIG4gCjAwMDAwMDM1
+ODggMDAwMDAgbiAKMDAwMDAwNzMyNiAwMDAwMCBuIAowMDAwMDA1ODAxIDAwMDAwIG4gCjAwMDAw
+MDU3NzcgMDAwMDAgbiAKMDAwMDAwNjExNSAwMDAwMCBuIAowMDAwMDA2MDkzIDAwMDAwIG4gCjAw
+MDAwMDc3OTAgMDAwMDAgbiAKMDAwMDAwNzI1MyAwMDAwMCBuIAowMDAwMDA3MjMwIDAwMDAwIG4g
+CjAwMDAwMDc3MTcgMDAwMDAgbiAKMDAwMDAwNzY5NCAwMDAwMCBuIAowMDAwMDA5MTI5IDAwMDAw
+IG4gCjAwMDAwMDkxMDUgMDAwMDAgbiAKMDAwMDAwOTI2OCAwMDAwMCBuIAowMDAwMDA5Mzk2IDAw
+MDAwIG4gCnRyYWlsZXIKPDwgL1NpemUgMjkKICAgL1Jvb3QgMjggMCBSCiAgIC9JbmZvIDI3IDAg
+Ugo+PgpzdGFydHhyZWYKOTQ0OQolJUVPRgo=
+# end logo-univ-lille1.pdf
+
+##############################################################################
+
+# begin-cgir logo-cgir.pdf base64 --decode
+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
+anEMJEI6hkWnGNHOQ15TwMs0Okj4I4KAMfkl4KXOoibRLP05Dso8fgwo93V+2tuhQSQR97CkZh9O
+ij2S+9Trb/XTtz4XpGuoHfJgqPC4lAgyQaK08eu7R5Y7C7+KIOGfBcMvMY28VWkfD5I4o8FQ/cTA
+jPSxuu/qzBoF1Vos/pqGQhqw1Cj8YgMW4gcSilNRkLyKNlheGltIztjDnEZSpbQSgYGo04T5RPTP
+ZOCxMfiV43uQq27+jHukQvbvGO7ol0fl1//gNGRK/v0/qimLbSj6mgN7Vuh2RpnEoWE38RMc0gQh
+q4URKCbNybaI1cHFr32LVf1+uqUJ/6g76d9D14mCYadjJrnUnCnubiGbulJG5Z0cEPkG+xov6To7
+VdKVJIwJrNRYvOEU8Ota22nWI8WOq4d5fA5bEgC9lqA2yxXWvzz8r1FA0GhZHgc0JSLnt8Nrsj+Z
+/259HQlWdoLJDkyyblap7KleCbhVsJ262br1tn+XHcuQE26Vb6hYeDGp8RStaFgGfWINsg01f4y6
++jsfiM4A293DxvsngSn9tNV61V7tVhPV5fZ/cfVtj3n8rv1xCYbOM/lz0lLkRjQ3z69IBFSZPop+
+ubi3a7OIVlIRU+U8fTjoo5e1wMRk/2e/Gs1KG1HnRrmmmV6/We7n+q/r/wFwUnB8CmVuZHN0cmVh
+bQplbmRvYmoKNCAwIG9iagogICA1OTAyCmVuZG9iagoyIDAgb2JqCjw8CiAgIC9FeHRHU3RhdGUg
+PDwKICAgICAgL2EwIDw8IC9DQSAxIC9jYSAxID4+CiAgID4+Cj4+CmVuZG9iago1IDAgb2JqCjw8
+IC9UeXBlIC9QYWdlCiAgIC9QYXJlbnQgMSAwIFIKICAgL01lZGlhQm94IFsgMCAwIDgwMCAxODUu
+Nzk2ODkgXQogICAvQ29udGVudHMgMyAwIFIKICAgL0dyb3VwIDw8CiAgICAgIC9UeXBlIC9Hcm91
+cAogICAgICAvUyAvVHJhbnNwYXJlbmN5CiAgICAgIC9JIHRydWUKICAgICAgL0NTIC9EZXZpY2VS
+R0IKICAgPj4KICAgL1Jlc291cmNlcyAyIDAgUgo+PgplbmRvYmoKMSAwIG9iago8PCAvVHlwZSAv
+UGFnZXMKICAgL0tpZHMgWyA1IDAgUiBdCiAgIC9Db3VudCAxCj4+CmVuZG9iago2IDAgb2JqCjw8
+IC9DcmVhdG9yIChjYWlybyAxLjEzLjEgKGh0dHA6Ly9jYWlyb2dyYXBoaWNzLm9yZykpCiAgIC9Q
+cm9kdWNlciAoY2Fpcm8gMS4xMy4xIChodHRwOi8vY2Fpcm9ncmFwaGljcy5vcmcpKQo+PgplbmRv
+YmoKNyAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwogICAvUGFnZXMgMSAwIFIKPj4KZW5kb2JqCnhy
+ZWYKMCA4CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwNjMwOSAwMDAwMCBuIAowMDAwMDA2MDE3
+IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwNTk5NCAwMDAwMCBuIAowMDAwMDA2
+MDg5IDAwMDAwIG4gCjAwMDAwMDYzNzQgMDAwMDAgbiAKMDAwMDAwNjUwMSAwMDAwMCBuIAp0cmFp
+bGVyCjw8IC9TaXplIDgKICAgL1Jvb3QgNyAwIFIKICAgL0luZm8gNiAwIFIKPj4Kc3RhcnR4cmVm
+CjY1NTMKJSVFT0YK
+# end logo-cgir.pdf
+
+##############################################################################
+
+# begin-all latex-pandoc.tex cat
+% -*-latex-*-
+\documentclass[10pt,twoside,openright]{report}
+
+% Paquets LaTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Une gestion correcte du français (en entrée et en sortie)
+\usepackage[french]{babel}
+\usepackage{type1ec}         % devant fontenc (cf type1ec.sty)
+\usepackage[T1]{fontenc}     % devant inputenc (utf8 choisi en fonction de ça)
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{20AC}{\euro} % pour la saisie du caractère euro
+
+%% Des "jolies" polices de caractères
+\usepackage{lmodern}            % pour sf et tt
+\usepackage{fourier}            % pour rm
+\usepackage{bbm}                % pour les mathbbm
+
+%% Plein de symboles
+\usepackage{amssymb,amsmath}    % Les symboles mathématiques de l'AMS
+\usepackage{latexsym}           % Quelques symboles manquants dans LaTeX 2e
+\usepackage{marvosym}           % Quelques symboles en vrac par Martin Vogel
+\usepackage{wasysym}            % Quelques symboles en vrac par Roland Waldi
+\usepackage{pifont}             % Les symboles Dingbats
+\usepackage{textcomp}           % \textcopyleft
+\usepackage[copyright]{ccicons} % Les (c) comme dans Creative Commons
+\usepackage[official,right]{eurosym} % L'euro
+
+%% Quelques paquets utiles
+\usepackage{geometry}
+\usepackage{array}              % pour faciliter les styles de tableaux
+\usepackage{relsize}            % pour le changement de taille des polices
+\usepackage[normalem]{ulem}     % pour avoir des soulignements funky
+\usepackage{tikz}               % pour les dessins portables
+\usepackage{fixltx2e}           % provides \textsubscript
+\usepackage{graphicx,grffile}   % pour les images
+\usepackage{fancyvrb}
+\usepackage{listings}           % pour les programmes
+\usepackage{hyperref}           % le plus tard possible d'après la doc
+
+% Configuration pandoc %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% scale images if necessary
+
+% This is done so that they will not overflow the page margins by default, and
+% it is still possible to overwrite the defaults using explicit options in
+% \includegraphics[width, height, ...]{}
+$if(graphics)$
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight0.8\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+$endif$
+
+%% 
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+%% redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%% prevent overfull lines
+\setlength{\emergencystretch}{3em}
+
+%% allow subtitle
+$if(subtitle)$
+\providecommand{\subtitle}{$subtitle$}
+$endif$
+
+%% enable a titlepage illustration
+$if(titleimg)$
+\providecommand{\titleimg}{$titleimg$}
+$endif$
+
+% Configuration document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frenchbsetup{%
+  ItemLabels=\textendash,%
+  og=«,%
+  fg=»}
+\geometry{%
+  a4paper,
+  top=1cm,bottom=1.5cm,
+  left=1.5cm,right=1cm}
+\hypersetup{%
+  $if(title-meta)$
+  pdftitle={$title-meta$},
+  $endif$
+  $if(author-meta)$
+  pdfauthor={$author-meta$},
+  $endif$
+  $if(keywords)$
+  pdfkeywords={$for(keywords)$$keywords$$sep$; $endfor$},
+  $endif$
+  hyperfootnotes=false,
+  colorlinks,
+  urlcolor=blue,
+  linkcolor=,
+  pdfstartview=Fit}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+% Méta-données du document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$if(title)$
+\title{$title$}
+$endif$
+$if(subtitle)$
+\subtitle{$subtitle$}
+$endif$
+
+$if(author)$
+\author{$for(author)$$author$$sep$ \and $endfor$}
+$endif$
+\date{$date$}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\input{titlepage}
+
+\tableofcontents
+
+$body$
+
+\end{document}
+# end latex.pandoc
+
+##############################################################################
+
+# begin-lille1 titlepage.tex cat
+\begin{titlepage}
+  \makeatletter
+  \null\vfil
+  \vskip 60\p@
+  \begin{center}%
+    {\larger[4]\bfseries \@title \par}%
+    \vskip 5em%
+    {\larger[3]%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}%
+      \par%
+    }%    
+    \vskip 5em%
+    {\larger[2] \@date \par}%
+    \vfill
+    {\ifx\titleimg\undefined\else
+     \includegraphics[width=.75\textwidth]{\titleimg}\fi}
+  \end{center}\par
+  \vfill
+  \centerline{\includegraphics[width=3cm]{logo-univ-lille1}}
+  \vskip 60\p@
+  \makeatother
+\end{titlepage}
+# end titlepage.tex
+
+##############################################################################
+
+# begin-cgir titlepage.tex cat
+\begin{titlepage}
+  \makeatletter
+  \null\vfil
+  \vskip 60\p@
+  \begin{center}%
+    {\larger[4]\bfseries \@title \par}%
+    \vskip 5em%
+    {\larger[3]%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}%
+      \par%
+    }%    
+    \vskip 5em%
+    {\larger[2] \@date \par}%
+    \vfill
+    {\ifx\titleimg\undefined\else
+     \includegraphics[width=.75\textwidth]{\titleimg}\fi}
+  \end{center}\par
+  \vfill
+  \null\hspace{2em}%
+  \includegraphics[width=3cm]{logo-univ-lille1}%
+  \hfill%
+  \includegraphics[width=5cm]{logo-cgir}%
+  \hspace{2em}\null
+  \vskip 60\p@
+  \makeatother
+\end{titlepage}
+# end titlepage.tex
