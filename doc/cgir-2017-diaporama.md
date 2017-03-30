@@ -99,7 +99,7 @@ Configuration
 
 ## Procédure
 
-![](img/conclution.png)
+![](img/recapitulatif.png)
 
 # Conclusion
 
